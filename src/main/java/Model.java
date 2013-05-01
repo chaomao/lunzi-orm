@@ -31,7 +31,6 @@ public abstract class Model {
                 input.setAccessible(true);
                 input.set(object, value);
             } catch (IllegalAccessException ignored) {
-                ignored.printStackTrace();
             }
         }
         return object;

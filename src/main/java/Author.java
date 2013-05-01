@@ -1,6 +1,3 @@
-import static com.google.common.collect.Iterables.filter;
-import static java.sql.DriverManager.getConnection;
-
 public class Author extends Model {
 
     @Column
