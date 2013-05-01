@@ -1,0 +1,8 @@
+DROP DATABASE IF EXISTS orm;
+CREATE DATABASE orm;
+USE orm;
+
+CREATE TABLE author(
+  id INT,
+  name VARCHAR(255)
+);
