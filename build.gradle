@@ -1,0 +1,71 @@
+//allprojects {
+//    apply plugin: 'java'
+//    apply plugin: 'idea'
+//    repositories {
+//        mavenCentral()
+//    }
+//
+//    dependencies {
+//        compile 'com.google.guava:guava:14.0.1'
+//        testCompile 'junit:junit:4.11'
+//    }
+//
+//}
+//
+//subprojects {
+//
+//    sourceCompatibility = 1.7
+//    targetCompatibility = 1.7
+//
+//    version = '1.0'
+//
+//    jar {
+//        manifest.attributes provider: 'gradle'
+//    }
+//
+//    task sourcesJar(type: Jar, dependsOn:classes) {
+//        classifier = 'sources'
+//        from sourceSets.main.allJava.srcDirs
+//        include '**/*.java'
+//    }
+//    build.dependsOn sourcesJar
+//}
+//
+//project(":core") {
+//    dependencies {
+//        compile 'com.samskivert:jmustache:1.7'
+//        compile 'javax.servlet:servlet-api:2.5'
+//        compile fileTree(dir: 'libs', include: '*.jar')
+//    }
+//    version = '1.0'
+//}
+//
+//project(":example") {
+//    dependencies {
+//        compile project(':core')
+//        compile 'org.mortbay.jetty:jetty:6.1.26'
+//    }
+//}
+
+allprojects {
+    apply plugin: 'idea'
+    apply plugin: 'java'
+
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+    version = 0.1
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        compile 'com.google.guava:guava:14.0.1'
+        testCompile 'junit:junit:4.11'
+    }
+
+    task "create-dirs" << {
+        sourceSets*.java.srcDirs*.each { it.mkdirs() }
+        sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+    }
+}
