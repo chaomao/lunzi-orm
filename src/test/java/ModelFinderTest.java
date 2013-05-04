@@ -10,7 +10,7 @@ import static java.sql.DriverManager.getConnection;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class AuthorTest {
+public class ModelFinderTest {
     private static Connection connection;
 
     @BeforeClass
@@ -24,7 +24,7 @@ public class AuthorTest {
             String insertQuery = "INSERT INTO author values(%d,'%s')";
             connection.createStatement().executeUpdate(String.format(insertQuery, 1, "MaoChao"));
 
-            Author author = Author.find(1);
+            Author author = (Author) ModelFinder.findById(Author.class, 1);
 
             assertThat(author.getId(), is(1));
             assertThat(author.getName(), is("MaoChao"));
