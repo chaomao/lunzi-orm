@@ -1,7 +1,9 @@
 
+import com.thoughtworks.orm.ModelFinder;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import test.model.Author;
 
 import java.sql.Connection;
 import java.sql.SQLException;

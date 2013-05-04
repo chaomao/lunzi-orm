@@ -1,5 +1,8 @@
+package com.thoughtworks.orm;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
+import com.thoughtworks.orm.annotation.Column;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

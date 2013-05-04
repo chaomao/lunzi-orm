@@ -1,3 +1,5 @@
+package com.thoughtworks.orm;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 
