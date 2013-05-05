@@ -1,3 +1,4 @@
+import com.thoughtworks.orm.ConnectionManager;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -7,9 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static java.sql.DriverManager.getConnection;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 
 public class ConnectionTest {
@@ -18,7 +17,7 @@ public class ConnectionTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        connection = getConnection("jdbc:mysql://localhost:3306/orm?user=root");
+        connection = ConnectionManager.getDBConnection();
     }
 
     @Test
@@ -42,5 +41,6 @@ public class ConnectionTest {
     @After
     public void tearDown() throws Exception {
         connection.createStatement().execute("TRUNCATE author");
+        connection.close();
     }
 }

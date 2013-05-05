@@ -43,5 +43,4 @@ public class ModelFinder {
         Column annotation = input.getAnnotation(Column.class);
         return annotation.value().isEmpty() ? input.getName() : annotation.value();
     }
-
 }

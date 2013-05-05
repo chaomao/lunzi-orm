@@ -1,9 +1,11 @@
+import com.thoughtworks.orm.ConnectionManager;
 import com.thoughtworks.orm.ModelFinder;
 import org.junit.After;
 import org.junit.Test;
 import test.model.Author;
 
-import static java.sql.DriverManager.getConnection;
+import java.sql.Connection;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -22,6 +24,8 @@ public class AuthorTest {
 
     @After
     public void tearDown() throws Exception {
-        getConnection("jdbc:mysql://localhost:3306/orm?user=root").createStatement().execute("TRUNCATE author");
+        Connection connection = ConnectionManager.getDBConnection();
+        connection.createStatement().execute("TRUNCATE author");
+        connection.close();
     }
 }

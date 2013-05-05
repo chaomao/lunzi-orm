@@ -1,4 +1,5 @@
 
+import com.thoughtworks.orm.ConnectionManager;
 import com.thoughtworks.orm.ModelFinder;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -17,7 +18,7 @@ public class ModelFinderTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        connection = getConnection("jdbc:mysql://localhost:3306/orm?user=root");
+        connection = ConnectionManager.getDBConnection();
     }
 
     @Test
@@ -37,5 +38,6 @@ public class ModelFinderTest {
     @After
     public void tearDown() throws Exception {
         connection.createStatement().execute("TRUNCATE author");
+        connection.close();
     }
 }

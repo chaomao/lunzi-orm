@@ -9,9 +9,14 @@ public class ConnectionManager {
     private static Connection connection;
 
     public static Connection getDBConnection() {
-        if (connection == null) {
-            connection = connect();
+        try {
+            if (connection == null || connection.isClosed()) {
+                connection = connect();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
         return connection;
     }
 
