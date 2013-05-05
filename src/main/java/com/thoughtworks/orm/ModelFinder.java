@@ -7,18 +7,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static com.google.common.collect.Iterables.filter;
-
 public class ModelFinder {
 
-    public static <T> T findById(Class<? extends ORMModel> modelClass, int id)  {
+    public static <T> T findById(Class<? extends ORMModel> modelClass, int id) {
         try {
             Object object = modelClass.getConstructor().newInstance();
             String findByIDQuery = String.format("SELECT * FROM %s where id=%d", ModelHelper.getTableName(object), id);
             ResultSet resultSet = ConnectionManager.getDBConnection().createStatement().executeQuery(findByIDQuery);
             Iterable<Field> annotatedColumns = ModelHelper.getAttributesWithId(object);
             return (T) setObject(object, resultSet, annotatedColumns);
-        } catch (SQLException| InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (SQLException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
             throw new RuntimeException();
         }
@@ -33,7 +31,8 @@ public class ModelFinder {
                 Object value = resultSet.getObject(columnName, columnType);
                 input.setAccessible(true);
                 input.set(object, value);
-            } catch (IllegalAccessException ignored) {
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
             }
         }
         return object;

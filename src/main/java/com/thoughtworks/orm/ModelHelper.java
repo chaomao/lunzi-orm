@@ -15,23 +15,23 @@ public class ModelHelper {
         return object.getClass().getSimpleName().toLowerCase();
     }
 
-    public static Iterable<Field> getAttributesWithId(Object author) {
+    public static Iterable<Field> getAttributesWithId(Object object) {
+        ArrayList<Field> fields = Lists.newArrayList(getAttributes(object));
+        fields.add(getIdField(object));
+        return fields;
+    }
+
+    private static Field getIdField(Object object){
         try {
-            ArrayList<Field> fields = Lists.newArrayList(author.getClass().getDeclaredFields());
-            fields.add(author.getClass().getSuperclass().getDeclaredField("id"));
-            return filter(fields, new Predicate<Field>() {
-                @Override
-                public boolean apply(Field input) {
-                    return input.isAnnotationPresent(Column.class);
-                }
-            });
+            return object.getClass().getSuperclass().getDeclaredField("id");
         } catch (NoSuchFieldException e) {
+            e.printStackTrace();
             throw new RuntimeException();
         }
     }
 
-    public static Iterable<Field> getAttributes(Object author) {
-        return filter(Lists.newArrayList(author.getClass().getDeclaredFields()), new Predicate<Field>() {
+    public static Iterable<Field> getAttributes(Object object) {
+        return filter(Lists.newArrayList(object.getClass().getDeclaredFields()), new Predicate<Field>() {
             @Override
             public boolean apply(Field input) {
                 return input.isAnnotationPresent(Column.class);

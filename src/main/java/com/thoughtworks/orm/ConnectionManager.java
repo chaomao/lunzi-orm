@@ -20,11 +20,7 @@ public class ConnectionManager {
         return connection;
     }
 
-    private static Connection connect() {
-        try {
-            return getConnection("jdbc:mysql://localhost:3306/orm?user=root");
-        } catch (SQLException e) {
-            throw new RuntimeException();
-        }
+    private static Connection connect() throws SQLException {
+        return getConnection("jdbc:mysql://localhost:3306/orm?user=root");
     }
 }
