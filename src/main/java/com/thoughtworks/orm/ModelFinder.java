@@ -28,7 +28,7 @@ public class ModelFinder {
             String columnName = getColumnName(input);
             Class<?> columnType = input.getType();
             try {
-                Object value = resultSet.getObject(columnName, columnType);
+                Object value = generateAttribute(resultSet, columnName, columnType);
                 input.setAccessible(true);
                 input.set(object, value);
             } catch (IllegalAccessException e) {
@@ -36,6 +36,14 @@ public class ModelFinder {
             }
         }
         return object;
+    }
+
+    private static Object generateAttribute(ResultSet resultSet, String columnName, Class<?> columnType) throws SQLException {
+        if (columnType.isEnum()) {
+            String object = resultSet.getObject(columnName, String.class);
+            return Enum.valueOf((Class<Enum>) columnType, object);
+        }
+        return resultSet.getObject(columnName, columnType);
     }
 
     private static String getColumnName(Field input) {

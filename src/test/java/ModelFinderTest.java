@@ -2,7 +2,6 @@
 import com.thoughtworks.orm.ModelFinder;
 import org.junit.Test;
 import test.model.Author;
-import test.model.DBTest;
 
 import java.sql.SQLException;
 

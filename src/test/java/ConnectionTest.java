@@ -1,10 +1,5 @@
-import com.thoughtworks.orm.ConnectionManager;
-import org.junit.After;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import test.model.DBTest;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;

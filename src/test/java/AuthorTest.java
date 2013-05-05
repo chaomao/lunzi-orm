@@ -1,11 +1,6 @@
-import com.thoughtworks.orm.ConnectionManager;
 import com.thoughtworks.orm.ModelFinder;
-import org.junit.After;
 import org.junit.Test;
 import test.model.Author;
-import test.model.DBTest;
-
-import java.sql.Connection;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

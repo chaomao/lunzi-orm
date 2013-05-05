@@ -33,9 +33,14 @@ public abstract class ORMModel {
         Iterable<Field> attributes = ModelHelper.getAttributes(this);
         int index = 1;
         for (Field field : attributes) {
-            field.setAccessible(true);
-            statement.setObject(index++, field.get(this));
+            statement.setObject(index++, createAttributeValue(field));
         }
+    }
+
+    private Object createAttributeValue(Field field) throws IllegalAccessException {
+        field.setAccessible(true);
+        Object value = field.get(this);
+        return field.getType().isEnum() ? value.toString() : value;
     }
 
     private void updateId(PreparedStatement statement) throws SQLException {
