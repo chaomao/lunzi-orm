@@ -26,7 +26,7 @@ public class ModelFinderTest {
             String insertQuery = "INSERT INTO author values(%d,'%s')";
             connection.createStatement().executeUpdate(String.format(insertQuery, 1, "MaoChao"));
 
-            Author author = (Author) ModelFinder.findById(Author.class, 1);
+            Author author = ModelFinder.findById(Author.class, 1);
 
             assertThat(author.getId(), is(1));
             assertThat(author.getName(), is("MaoChao"));

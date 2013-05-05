@@ -14,13 +14,13 @@ import static com.google.common.collect.Iterables.filter;
 
 public class ModelFinder {
 
-    public static Object findById(Class modelClass, int id) throws SQLException {
+    public static <T> T findById(Class<? extends ORMModel> modelClass, int id) throws SQLException {
         try {
             Object object = modelClass.getConstructor().newInstance();
             String findByIDQuery = String.format("SELECT * FROM %s where id=%d", getTableName(object), id);
             ResultSet resultSet = ConnectionManager.getDBConnection().createStatement().executeQuery(findByIDQuery);
             Iterable<Field> annotatedColumns = getAnnotatedFields(object);
-            return setObject(object, resultSet, annotatedColumns);
+            return (T) setObject(object, resultSet, annotatedColumns);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException();
         }
