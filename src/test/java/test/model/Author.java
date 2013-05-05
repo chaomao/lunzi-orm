@@ -8,6 +8,10 @@ public class Author extends ORMModel {
     @Column
     private String name;
 
+    public Author(String name) {
+        this.name = name;
+    }
+
     public Author() {
     }
 
@@ -17,5 +21,20 @@ public class Author extends ORMModel {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Author)) return false;
+
+        Author author = (Author) o;
+
+        return name.equals(author.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
     }
 }

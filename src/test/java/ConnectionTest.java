@@ -9,6 +9,7 @@ import java.sql.Statement;
 
 import static java.sql.DriverManager.getConnection;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 
 public class ConnectionTest {
@@ -23,14 +24,14 @@ public class ConnectionTest {
     @Test
     public void should_insert_and_select_data_from_db_in_plain_sql() {
         try {
-            String insertQuery = "INSERT INTO author values(%d,'%s')";
-            connection.createStatement().executeUpdate(String.format(insertQuery, 0, "maochao"));
+            String insertQuery = "INSERT INTO author (name) values('%s')";
+            connection.createStatement().executeUpdate(String.format(insertQuery, "maochao"));
 
             Statement statement = connection.createStatement();
             String sql = "SELECT * FROM author";
             ResultSet resultSet = statement.executeQuery(sql);
             while (resultSet.next()) {
-                assertThat(resultSet.getString(1), is("0"));
+                assertThat(resultSet.getString(1), is("1"));
                 assertThat(resultSet.getString(2), is("maochao"));
             }
         } catch (SQLException e) {

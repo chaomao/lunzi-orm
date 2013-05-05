@@ -6,11 +6,10 @@ import com.thoughtworks.orm.annotation.Column;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 
 import static com.google.common.collect.Iterables.filter;
 
-class ModelHelper {
+public class ModelHelper {
 
     public static String getTableName(Object object) {
         return object.getClass().getSimpleName().toLowerCase();
@@ -39,5 +38,4 @@ class ModelHelper {
             }
         });
     }
-
 }

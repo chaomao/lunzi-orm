@@ -21,7 +21,7 @@ public class ModelFinderTest {
     }
 
     @Test
-    public void should_get_author_from_db_using_static_find() throws Exception {
+    public void should_get_author_from_db_using_static_find(){
         try {
             String insertQuery = "INSERT INTO author values(%d,'%s')";
             connection.createStatement().executeUpdate(String.format(insertQuery, 1, "MaoChao"));
@@ -31,7 +31,6 @@ public class ModelFinderTest {
             assertThat(author.getId(), is(1));
             assertThat(author.getName(), is("MaoChao"));
         } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
