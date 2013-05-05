@@ -5,4 +5,5 @@
 5. implement model with foreign key
 6. implement model with foreign key and support List, Set and Array
 7. kill N+1 query problem
+8. kill db connection problem, when should we close db connection?
 
