@@ -2,6 +2,7 @@ import com.thoughtworks.orm.ConnectionManager;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import test.model.DBTest;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -11,14 +12,7 @@ import java.sql.Statement;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class ConnectionTest {
-
-    private static Connection connection;
-
-    @BeforeClass
-    public static void beforeClass() throws Exception {
-        connection = ConnectionManager.getDBConnection();
-    }
+public class ConnectionTest extends DBTest{
 
     @Test
     public void should_insert_and_select_data_from_db_in_plain_sql() {
@@ -36,11 +30,5 @@ public class ConnectionTest {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        connection.createStatement().execute("TRUNCATE author");
-        connection.close();
     }
 }

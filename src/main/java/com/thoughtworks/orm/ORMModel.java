@@ -43,4 +43,8 @@ public abstract class ORMModel {
         generatedKeys.next();
         id = generatedKeys.getInt(1);
     }
+
+    public int getId() {
+        return id;
+    }
 }

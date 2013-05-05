@@ -3,13 +3,14 @@ import com.thoughtworks.orm.ModelFinder;
 import org.junit.After;
 import org.junit.Test;
 import test.model.Author;
+import test.model.DBTest;
 
 import java.sql.Connection;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class AuthorTest {
+public class AuthorTest extends DBTest{
 
     @Test
     public void should_save_author_into_db() {
@@ -20,12 +21,5 @@ public class AuthorTest {
 
         assertThat(result, is(author));
         assertThat(result.getId(), is(author.getId()));
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        Connection connection = ConnectionManager.getDBConnection();
-        connection.createStatement().execute("TRUNCATE author");
-        connection.close();
     }
 }
