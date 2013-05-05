@@ -1,17 +1,19 @@
 package test.model;
 
-import com.thoughtworks.orm.ORMModel;
-import com.thoughtworks.orm.annotation.Column;
+import com.thoughtworks.orm.Model;
 
-public class Person extends ORMModel {
-    @Column
+public class Person extends Model {
     private int age;
-    @Column
     private String name;
-    @Column
-    private Sex sex;
+    private Gender gender;
 
     public Person() {
+    }
+
+    public Person(int age, String name, Gender gender) {
+        this.age = age;
+        this.name = name;
+        this.gender = gender;
     }
 
     public int getAge() {
@@ -22,14 +24,8 @@ public class Person extends ORMModel {
         return name;
     }
 
-    public Sex getSex() {
-        return sex;
-    }
-
-    public Person(int age, String name, Sex sex) {
-        this.age = age;
-        this.name = name;
-        this.sex = sex;
+    public Gender getGender() {
+        return gender;
     }
 
     @Override
@@ -41,7 +37,7 @@ public class Person extends ORMModel {
 
         if (age != person.age) return false;
         if (!name.equals(person.name)) return false;
-        if (sex != person.sex) return false;
+        if (gender != person.gender) return false;
 
         return true;
     }
@@ -50,7 +46,7 @@ public class Person extends ORMModel {
     public int hashCode() {
         int result = age;
         result = 31 * result + name.hashCode();
-        result = 31 * result + sex.hashCode();
+        result = 31 * result + gender.hashCode();
         return result;
     }
 }

@@ -1,11 +1,9 @@
 package test.model;
 
-import com.thoughtworks.orm.ORMModel;
-import com.thoughtworks.orm.annotation.Column;
+import com.thoughtworks.orm.Model;
 
-public class Author extends ORMModel {
+public class Author extends Model {
 
-    @Column
     private String name;
 
     public Author(String name) {

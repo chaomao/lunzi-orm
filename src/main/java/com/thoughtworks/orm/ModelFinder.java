@@ -1,7 +1,5 @@
 package com.thoughtworks.orm;
 
-import com.thoughtworks.orm.annotation.Column;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
@@ -9,7 +7,7 @@ import java.sql.SQLException;
 
 public class ModelFinder {
 
-    public static <T> T findById(Class<? extends ORMModel> modelClass, int id) {
+    public static <T> T findById(Class<? extends Model> modelClass, int id) {
         try {
             Object object = modelClass.getConstructor().newInstance();
             String findByIDQuery = String.format("SELECT * FROM %s where id=%d", ModelHelper.getTableName(object), id);
@@ -47,7 +45,6 @@ public class ModelFinder {
     }
 
     private static String getColumnName(Field input) {
-        Column annotation = input.getAnnotation(Column.class);
-        return annotation.value().isEmpty() ? input.getName() : annotation.value();
+        return input.getName();
     }
 }

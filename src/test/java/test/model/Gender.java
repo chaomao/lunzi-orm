@@ -1,5 +1,5 @@
 package test.model;
 
-public enum Sex {
+public enum Gender {
     Man, Woman
 }

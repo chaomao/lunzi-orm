@@ -1,14 +1,11 @@
 package com.thoughtworks.orm;
 
-import com.thoughtworks.orm.annotation.Column;
-
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public abstract class ORMModel {
-    @Column
+public abstract class Model {
     protected int id;
 
     public void save() {

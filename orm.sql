@@ -11,5 +11,5 @@ CREATE TABLE person(
   id  int(11) NOT NULL auto_increment PRIMARY KEY,
   age int,
   name VARCHAR(255),
-  sex varchar(255)
+  gender varchar(255)
 );
