@@ -22,5 +22,6 @@ CREATE TABLE person (
   id     INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   age    INT,
   name   VARCHAR(255),
-  gender VARCHAR(255)
+  gender VARCHAR(255),
+  telephoneNumbers VARCHAR(255)
 );

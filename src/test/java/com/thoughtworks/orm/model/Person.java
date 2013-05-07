@@ -2,18 +2,22 @@ package com.thoughtworks.orm.model;
 
 import com.thoughtworks.orm.Model;
 
+import java.util.ArrayList;
+
 public class Person extends Model {
     private int age;
     private String name;
     private Gender gender;
+    private ArrayList<String> telephoneNumbers;
 
     public Person() {
     }
 
-    public Person(int age, String name, Gender gender) {
+    public Person(int age, String name, Gender gender, ArrayList<String> telephoneNumbers) {
         this.age = age;
         this.name = name;
         this.gender = gender;
+        this.telephoneNumbers = telephoneNumbers;
     }
 
     public int getAge() {
@@ -36,8 +40,9 @@ public class Person extends Model {
         Person person = (Person) o;
 
         if (age != person.age) return false;
-        if (!name.equals(person.name)) return false;
         if (gender != person.gender) return false;
+        if (!name.equals(person.name)) return false;
+        if (!telephoneNumbers.equals(person.telephoneNumbers)) return false;
 
         return true;
     }
@@ -47,6 +52,7 @@ public class Person extends Model {
         int result = age;
         result = 31 * result + name.hashCode();
         result = 31 * result + gender.hashCode();
+        result = 31 * result + telephoneNumbers.hashCode();
         return result;
     }
 }

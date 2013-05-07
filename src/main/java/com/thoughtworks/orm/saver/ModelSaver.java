@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class ModelSaver {
     protected Model model;
@@ -70,7 +71,21 @@ public class ModelSaver {
 
     protected Object createAttributeValue(Field field) throws IllegalAccessException {
         Object value = field.get(getModel());
-        return field.getType().isEnum() ? value.toString() : value;
+        Class<?> type = field.getType();
+        if (type.isEnum()) {
+            return value.toString();
+        } else if (type.equals(ArrayList.class)) {
+            return createArrayListValue((ArrayList) value);
+        } else return value;
+    }
+
+    private Object createArrayListValue(ArrayList value) {
+        StringBuilder sb = new StringBuilder();
+        for (Object o : value) {
+            sb.append(o.toString());
+            sb.append("--");
+        }
+        return sb.toString();
     }
 
     protected void updateSelfId(PreparedStatement statement) throws SQLException {
