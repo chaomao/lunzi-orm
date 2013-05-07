@@ -1,3 +1,5 @@
+package com.thoughtworks.orm;
+
 import com.thoughtworks.orm.ConnectionManager;
 import org.junit.After;
 import org.junit.BeforeClass;

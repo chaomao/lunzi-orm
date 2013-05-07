@@ -1,4 +1,4 @@
-package test.model;
+package com.thoughtworks.orm.model;
 
 import com.thoughtworks.orm.Model;
 

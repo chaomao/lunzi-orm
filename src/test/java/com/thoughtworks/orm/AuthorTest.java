@@ -1,6 +1,7 @@
-import com.thoughtworks.orm.ModelFinder;
+package com.thoughtworks.orm;
+
 import org.junit.Test;
-import test.model.Author;
+import com.thoughtworks.orm.model.Author;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

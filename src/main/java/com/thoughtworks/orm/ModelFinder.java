@@ -12,7 +12,7 @@ public class ModelFinder {
             Object object = modelClass.getConstructor().newInstance();
             String findByIDQuery = String.format("SELECT * FROM %s where id=%d", ModelHelper.getTableName(object), id);
             ResultSet resultSet = ConnectionManager.getDBConnection().createStatement().executeQuery(findByIDQuery);
-            Iterable<Field> annotatedColumns = ModelHelper.getAttributesWithId(object);
+            Iterable<Field> annotatedColumns = ModelHelper.getAttributesForInsertWithId(object);
             return (T) setObject(object, resultSet, annotatedColumns);
         } catch (SQLException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();

@@ -1,3 +1,5 @@
+package com.thoughtworks.orm;
+
 import org.junit.Test;
 
 import java.sql.ResultSet;

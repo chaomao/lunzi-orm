@@ -1,6 +1,7 @@
 package com.thoughtworks.orm;
 
 import com.google.common.base.Function;
+import com.thoughtworks.orm.annotation.HasOne;
 
 import java.lang.reflect.Field;
 
@@ -9,18 +10,17 @@ import static com.thoughtworks.orm.ModelHelper.getTableName;
 
 public class QueryGenerator {
     private static final String INSERT_QUERY = "INSERT INTO %s (%s) VALUES (%s)";
-    public static String insert(Object object) {
-        Iterable<Field> attributes = ModelHelper.getAttributes(object);
 
-        return String.format(INSERT_QUERY,getTableName(object),
-                join(getAttributeNames(attributes), ", "),
-                join(getAttributePlaceHolders(attributes), ", "));
+    public static String insertQuery(Object object, Iterable<Field> attributesForInsert) {
+        return String.format(INSERT_QUERY, getTableName(object),
+                join(getAttributeNames(attributesForInsert), ", "),
+                join(getAttributePlaceHolders(attributesForInsert), ", "));
     }
 
-    private static Iterable<String> getAttributePlaceHolders(Iterable<Field> attributes) {
-        return transform(attributes, new Function<Field, String>() {
+    private static Iterable<String> getAttributePlaceHolders(Iterable attributes) {
+        return transform(attributes, new Function<Object, String>() {
             @Override
-            public String apply(Field input) {
+            public String apply(Object input) {
                 return "?";
             }
         });
@@ -30,7 +30,9 @@ public class QueryGenerator {
         return transform(attributes, new Function<Field, String>() {
             @Override
             public String apply(Field input) {
-                return input.getName();
+                return input.isAnnotationPresent(HasOne.class) ?
+                        input.getAnnotation(HasOne.class).foreignKey() :
+                        input.getName();
             }
         });
     }

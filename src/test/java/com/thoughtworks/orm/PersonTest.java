@@ -1,7 +1,8 @@
-import com.thoughtworks.orm.ModelFinder;
+package com.thoughtworks.orm;
+
 import org.junit.Test;
-import test.model.Gender;
-import test.model.Person;
+import com.thoughtworks.orm.model.Gender;
+import com.thoughtworks.orm.model.Person;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
