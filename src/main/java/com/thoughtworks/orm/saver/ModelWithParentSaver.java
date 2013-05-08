@@ -2,10 +2,11 @@ package com.thoughtworks.orm.saver;
 
 import com.google.common.collect.Lists;
 import com.thoughtworks.orm.Model;
-import com.thoughtworks.orm.ModelHelper;
 
 import java.lang.reflect.Field;
 import java.util.List;
+
+import static com.thoughtworks.orm.ModelHelper.hasAssociation;
 
 public class ModelWithParentSaver extends ModelSaver {
 
@@ -27,7 +28,7 @@ public class ModelWithParentSaver extends ModelSaver {
 
     @Override
     protected Object createAttributeValue(Field field) throws IllegalAccessException {
-        return ModelHelper.hasAssociation(field) ? Integer.valueOf(parent.getId()) :
+        return hasAssociation(field) ? Integer.valueOf(parent.getId()) :
                 super.createAttributeValue(field);
     }
 }

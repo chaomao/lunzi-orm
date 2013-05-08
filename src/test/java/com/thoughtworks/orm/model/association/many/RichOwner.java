@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class RichOwner extends Model {
 
     private String name;
-    @HasMany(foreignKey = "owner_id")
+    @HasMany(foreignKey = "owner_id", klass = House.class)
     private ArrayList<House> houses;
 
     public RichOwner() {

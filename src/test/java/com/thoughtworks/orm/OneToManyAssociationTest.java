@@ -19,9 +19,7 @@ public class OneToManyAssociationTest extends DBTest {
         RichOwner owner = new RichOwner("Mao Chao", houses);
         owner.save();
 
-        assertThat(owner.getId(), not(is(0)));
-        for (House house : owner.getHouses()) {
-            assertThat(house.getId(), not(is(0)));
-        }
+        RichOwner result = ModelFinder.findById(RichOwner.class, owner.getId());
+        assertThat(result.getHouses(), is(houses));
     }
 }
