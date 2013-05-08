@@ -13,7 +13,11 @@ import static com.google.common.collect.Iterables.filter;
 public class ModelHelper {
 
     public static String getTableName(Object object) {
-        return object.getClass().getSimpleName().toLowerCase();
+        return getTableName(object.getClass());
+    }
+
+    public static String getTableName(Class klass) {
+        return klass.getSimpleName().toLowerCase();
     }
 
     public static Iterable<Field> getAttributesForInsertWithId(Object object) {

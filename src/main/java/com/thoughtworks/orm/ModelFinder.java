@@ -1,24 +1,61 @@
 package com.thoughtworks.orm;
 
-import javax.swing.text.rtf.RTFEditorKit;
+import com.thoughtworks.orm.annotation.HasOne;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import static com.thoughtworks.orm.ModelHelper.getAttributesForInsertWithId;
+import static com.thoughtworks.orm.ModelHelper.getTableName;
+import static com.thoughtworks.orm.QueryGenerator.getFindByIdQuery;
+import static com.thoughtworks.orm.QueryGenerator.getWhereQuery;
+
 public class ModelFinder {
 
-    public static <T> T findById(Class<? extends Model> modelClass, int id) {
+    public static <T> T findById(Class<T> modelClass, int id) {
         try {
             Object object = modelClass.getConstructor().newInstance();
-            String findByIDQuery = String.format("SELECT * FROM %s where id=%d", ModelHelper.getTableName(object), id);
-            ResultSet resultSet = ConnectionManager.getDBConnection().createStatement().executeQuery(findByIDQuery);
-            Iterable<Field> annotatedColumns = ModelHelper.getAttributesForInsertWithId(object);
-            return (T) setObject(object, resultSet, annotatedColumns);
+            PreparedStatement statement = ConnectionManager.getDBConnection().prepareStatement(getFindByIdQuery(modelClass));
+            statement.setObject(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            Iterable<Field> columns = getAttributesForInsertWithId(object);
+            Object model = setObject(object, resultSet, columns);
+            setChildren(model, id);
+            return (T) model;
         } catch (SQLException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
             throw new RuntimeException();
+        }
+    }
+
+    private static void setChildren(Object model, int id) {
+        Iterable<Field> associationFields = ModelHelper.getHasAssociationFields(model);
+        for (Field field : associationFields) {
+            if (field.isAnnotationPresent(HasOne.class)) {
+                processHasOne(model, field, id);
+            }
+        }
+    }
+
+    private static void processHasOne(Object model, Field field, int parent_id) {
+        String foreignKey = field.getAnnotation(HasOne.class).foreignKey();
+        Class<?> childType = field.getType();
+        try {
+            String criteria = String.format("%s = ?", foreignKey);
+            String whereQuery = getWhereQuery(getTableName(childType), criteria);
+            PreparedStatement statement = ConnectionManager.getDBConnection().prepareStatement(whereQuery);
+            statement.setObject(1, parent_id);
+            ResultSet resultSet = statement.executeQuery();
+            Object child = childType.newInstance();
+            Iterable<Field> columns = getAttributesForInsertWithId(child);
+            child = setObject(child, resultSet, columns);
+            field.set(model, child);
+        } catch (SQLException | InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 

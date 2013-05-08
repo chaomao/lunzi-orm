@@ -11,4 +11,21 @@ public class House extends Model {
     public House(int size) {
         this.size = size;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof House)) return false;
+
+        House house = (House) o;
+
+        if (size != house.size) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return size;
+    }
 }

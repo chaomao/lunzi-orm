@@ -5,9 +5,7 @@ import com.google.common.base.Function;
 import java.lang.reflect.Field;
 
 import static com.google.common.collect.Iterables.transform;
-import static com.thoughtworks.orm.ModelHelper.getForeignKey;
-import static com.thoughtworks.orm.ModelHelper.getTableName;
-import static com.thoughtworks.orm.ModelHelper.hasAssociation;
+import static com.thoughtworks.orm.ModelHelper.*;
 
 public class QueryGenerator {
     private static final String INSERT_QUERY = "INSERT INTO %s (%s) VALUES (%s)";
@@ -46,5 +44,13 @@ public class QueryGenerator {
         }
         String result = temp.toString();
         return result.substring(0, result.length() - delimiter.length());
+    }
+
+    public static String getFindByIdQuery(Class klass) {
+        return String.format("SELECT * FROM %s WHERE id=?", getTableName(klass));
+    }
+
+    public static String getWhereQuery(String tableName, String criteria) {
+        return String.format("SELECT * FROM %s WHERE %s", tableName, criteria);
     }
 }
