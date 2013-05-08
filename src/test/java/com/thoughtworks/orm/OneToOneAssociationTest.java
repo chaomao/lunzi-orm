@@ -1,7 +1,7 @@
 package com.thoughtworks.orm;
 
-import com.thoughtworks.orm.model.association.one.to.one.House;
-import com.thoughtworks.orm.model.association.one.to.one.Owner;
+import com.thoughtworks.orm.model.association.one.House;
+import com.thoughtworks.orm.model.association.one.Owner;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;

@@ -1,4 +1,4 @@
-package com.thoughtworks.orm.model.association.one.to.one;
+package com.thoughtworks.orm.model.association.one;
 
 import com.thoughtworks.orm.Model;
 

@@ -1,12 +1,13 @@
 package com.thoughtworks.orm;
 
 import com.google.common.base.Function;
-import com.thoughtworks.orm.annotation.HasOne;
 
 import java.lang.reflect.Field;
 
 import static com.google.common.collect.Iterables.transform;
+import static com.thoughtworks.orm.ModelHelper.getForeignKey;
 import static com.thoughtworks.orm.ModelHelper.getTableName;
+import static com.thoughtworks.orm.ModelHelper.hasAssociation;
 
 public class QueryGenerator {
     private static final String INSERT_QUERY = "INSERT INTO %s (%s) VALUES (%s)";
@@ -30,8 +31,8 @@ public class QueryGenerator {
         return transform(attributes, new Function<Field, String>() {
             @Override
             public String apply(Field input) {
-                return input.isAnnotationPresent(HasOne.class) ?
-                        input.getAnnotation(HasOne.class).foreignKey() :
+                return hasAssociation(input) ?
+                        getForeignKey(input) :
                         input.getName();
             }
         });

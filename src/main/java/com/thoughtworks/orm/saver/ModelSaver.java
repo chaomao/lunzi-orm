@@ -46,14 +46,28 @@ public class ModelSaver {
     }
 
     protected void saveAssociations() {
-        for (Field field : ModelHelper.getHasOneAssociationFields(getModel())) {
+        for (Field field : ModelHelper.getHasAssociationFields(getModel())) {
             try {
-                Model associationModel = (Model) field.get(getModel());
-                ModelWithParentModelSaver saver = new ModelWithParentModelSaver(associationModel, getModel(), field);
-                saver.save();
+                if (field.getType().equals(ArrayList.class)) {
+                    saveListWithParent(field);
+                } else {
+                    saveWithParent(field, (Model) field.get(getModel()));
+                }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void saveWithParent(Field field, Model associatedModel) throws IllegalAccessException {
+        ModelWithParentSaver saver = new ModelWithParentSaver(associatedModel, getModel(), field);
+        saver.save();
+    }
+
+    private void saveListWithParent(Field field) throws IllegalAccessException {
+        ArrayList<? extends Model> list = (ArrayList) field.get(getModel());
+        for (Model associatedModel : list) {
+            saveWithParent(field, associatedModel);
         }
     }
 

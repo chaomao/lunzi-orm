@@ -2,17 +2,17 @@ package com.thoughtworks.orm.saver;
 
 import com.google.common.collect.Lists;
 import com.thoughtworks.orm.Model;
-import com.thoughtworks.orm.annotation.HasOne;
+import com.thoughtworks.orm.ModelHelper;
 
 import java.lang.reflect.Field;
 import java.util.List;
 
-public class ModelWithParentModelSaver extends ModelSaver {
+public class ModelWithParentSaver extends ModelSaver {
 
     private Model parent;
     private Field associatedField;
 
-    public ModelWithParentModelSaver(Model model, Model parent, Field associatedField) {
+    public ModelWithParentSaver(Model model, Model parent, Field associatedField) {
         super(model);
         this.parent = parent;
         this.associatedField = associatedField;
@@ -27,8 +27,7 @@ public class ModelWithParentModelSaver extends ModelSaver {
 
     @Override
     protected Object createAttributeValue(Field field) throws IllegalAccessException {
-        return field.isAnnotationPresent(HasOne.class) ?
-                Integer.valueOf(parent.getId()) :
+        return ModelHelper.hasAssociation(field) ? Integer.valueOf(parent.getId()) :
                 super.createAttributeValue(field);
     }
 }
