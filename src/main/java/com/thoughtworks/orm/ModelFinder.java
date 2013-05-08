@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import static com.thoughtworks.orm.ModelHelper.getAttributesForInsertWithId;
 import static com.thoughtworks.orm.ModelHelper.getTableName;
@@ -19,18 +20,22 @@ public class ModelFinder {
 
     public static <T> T findById(Class<T> modelClass, int id) {
         try {
-            Object object = modelClass.getConstructor().newInstance();
-            PreparedStatement statement = ConnectionManager.getDBConnection().prepareStatement(getFindByIdQuery(modelClass));
-            statement.setObject(1, id);
-            ResultSet resultSet = statement.executeQuery();
-            Iterable<Field> columns = getAttributesForInsertWithId(object);
-            Object model = setObject(object, resultSet, columns);
+            String findByIdQuery = getFindByIdQuery(modelClass);
+            ResultSet resultSet = getResultSet(id, findByIdQuery);
+            ArrayList<Object> objects = createObjectsFromResult(modelClass, resultSet);
+            Object model = objects.get(0);
             setChildren(model, id);
             return (T) model;
-        } catch (SQLException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException();
         }
+    }
+
+    private static ResultSet getResultSet(int id, String findByIdQuery) throws SQLException {
+        PreparedStatement statement = ConnectionManager.getDBConnection().prepareStatement(findByIdQuery);
+        statement.setObject(1, id);
+        return statement.executeQuery();
     }
 
     private static void setChildren(Object model, int id) {
@@ -48,13 +53,7 @@ public class ModelFinder {
         String foreignKey = field.getAnnotation(HasOne.class).foreignKey();
         Class<?> childType = field.getType();
         try {
-            String criteria = String.format("%s = ?", foreignKey);
-            String whereQuery = getWhereQuery(getTableName(childType), criteria);
-            PreparedStatement statement = ConnectionManager.getDBConnection().prepareStatement(whereQuery);
-            statement.setObject(1, parent_id);
-            ResultSet resultSet = statement.executeQuery();
-            ArrayList<Object> child1 = createChild(childType, resultSet);
-            field.set(model, child1.get(0));
+            field.set(model, getChildren(parent_id, foreignKey, childType).get(0));
         } catch (SQLException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -65,54 +64,37 @@ public class ModelFinder {
         String foreignKey = annotation.foreignKey();
         Class childType = annotation.klass();
         try {
-            String criteria = String.format("%s = ?", foreignKey);
-            String whereQuery = getWhereQuery(getTableName(childType), criteria);
-            PreparedStatement statement = ConnectionManager.getDBConnection().prepareStatement(whereQuery);
-            statement.setObject(1, parent_id);
-            ResultSet resultSet = statement.executeQuery();
-            ArrayList<Object> resultLists = createChild(childType, resultSet);
-            field.set(model, resultLists);
+            field.set(model, getChildren(parent_id, foreignKey, childType));
         } catch (SQLException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
     }
 
-    private static ArrayList<Object> createChild(Class childType, ResultSet resultSet) throws SQLException, InstantiationException, IllegalAccessException {
-        ArrayList<Object> resultLists = new ArrayList<>();
-        while (resultSet.next()) {
-            Object child = childType.newInstance();
-            Iterable<Field> columns = getAttributesForInsertWithId(child);
-
-            for (Field input : columns) {
-                String columnName = getColumnName(input);
-                Class<?> columnType = input.getType();
-                try {
-                    Object value = generateAttribute(resultSet, columnName, columnType);
-                    input.setAccessible(true);
-                    input.set(child, value);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-            resultLists.add(child);
-        }
-        return resultLists;
+    private static ArrayList<Object> getChildren(int parent_id, String foreignKey, Class childType) throws SQLException, InstantiationException, IllegalAccessException {
+        String criteria = String.format("%s = ?", foreignKey);
+        String whereQuery = getWhereQuery(getTableName(childType), criteria);
+        ResultSet resultSet = getResultSet(parent_id, whereQuery);
+        return createObjectsFromResult(childType, resultSet);
     }
 
-    private static Object setObject(Object object, ResultSet resultSet, Iterable<Field> annotatedColumns) throws SQLException {
-        resultSet.next();
-        for (Field input : annotatedColumns) {
-            String columnName = getColumnName(input);
-            Class<?> columnType = input.getType();
+    private static ArrayList<Object> createObjectsFromResult(Class modelClass, ResultSet resultSet) throws SQLException {
+        ArrayList<Object> resultLists = new ArrayList<>();
+        while (resultSet.next()) {
             try {
-                Object value = generateAttribute(resultSet, columnName, columnType);
-                input.setAccessible(true);
-                input.set(object, value);
-            } catch (IllegalAccessException e) {
+                Object child = modelClass.newInstance();
+                Iterable<Field> columns = getAttributesForInsertWithId(child);
+                for (Field input : columns) {
+                    String columnName = getColumnName(input);
+                    Class<?> columnType = input.getType();
+                    Object value = generateAttribute(resultSet, columnName, columnType);
+                    input.set(child, value);
+                }
+                resultLists.add(child);
+            } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
-        return object;
+        return resultLists;
     }
 
     private static Object generateAttribute(ResultSet resultSet, String columnName, Class<?> columnType) throws SQLException {
@@ -129,9 +111,7 @@ public class ModelFinder {
             String object = resultSet.getObject(columnName, String.class);
             String[] splits = object.split("--");
             ArrayList result = (ArrayList) columnType.getConstructor().newInstance();
-            for (String split : splits) {
-                result.add(split);
-            }
+            Collections.addAll(result, splits);
             return result;
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | SQLException e) {
             e.printStackTrace();
