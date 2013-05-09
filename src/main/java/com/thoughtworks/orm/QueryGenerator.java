@@ -50,6 +50,10 @@ public class QueryGenerator {
         return String.format("SELECT * FROM %s WHERE id=?", getTableName(klass));
     }
 
+    public static String getFindAllQuery(Class klass) {
+        return String.format("SELECT * FROM %s", getTableName(klass));
+    }
+
     public static String getWhereQuery(String tableName, String criteria) {
         return String.format("SELECT * FROM %s WHERE %s", tableName, criteria);
     }

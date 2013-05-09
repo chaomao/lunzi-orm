@@ -1,12 +1,16 @@
 package com.thoughtworks.orm;
 
-import org.junit.Test;
+import com.google.common.collect.Lists;
+import com.thoughtworks.orm.finder.ModelFinder;
 import com.thoughtworks.orm.model.Author;
+import org.junit.Test;
+
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class AuthorTest extends DBTest{
+public class AuthorTest extends DBTest {
 
     @Test
     public void should_save_author_into_db() {
@@ -17,5 +21,16 @@ public class AuthorTest extends DBTest{
 
         assertThat(result, is(author));
         assertThat(result.getId(), is(author.getId()));
+    }
+
+    @Test
+    public void should_return_all_authors() {
+        List<Author> arrayList = Lists.newArrayList(new Author("1"), new Author("2"));
+        for (Author author : arrayList) {
+            author.save();
+        }
+
+        List<Author> all = ModelFinder.findAll(Author.class);
+        assertThat(all, is(arrayList));
     }
 }

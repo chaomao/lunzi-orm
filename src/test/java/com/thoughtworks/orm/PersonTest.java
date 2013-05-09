@@ -1,6 +1,7 @@
 package com.thoughtworks.orm;
 
 import com.google.common.collect.Lists;
+import com.thoughtworks.orm.finder.ModelFinder;
 import com.thoughtworks.orm.model.Gender;
 import com.thoughtworks.orm.model.Person;
 import org.junit.Test;

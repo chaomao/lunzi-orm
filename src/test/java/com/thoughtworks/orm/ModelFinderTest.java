@@ -1,5 +1,6 @@
 package com.thoughtworks.orm;
 
+import com.thoughtworks.orm.finder.ModelFinder;
 import org.junit.Test;
 import com.thoughtworks.orm.model.Author;
 

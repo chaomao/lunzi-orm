@@ -1,6 +1,7 @@
 package com.thoughtworks.orm;
 
 import com.google.common.collect.Lists;
+import com.thoughtworks.orm.finder.ModelFinder;
 import com.thoughtworks.orm.model.association.many.RichOwner;
 import com.thoughtworks.orm.model.association.one.House;
 import org.junit.Test;

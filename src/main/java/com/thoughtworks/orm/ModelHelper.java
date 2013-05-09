@@ -28,7 +28,9 @@ public class ModelHelper {
 
     private static Field getIdField(Object object) {
         try {
-            return object.getClass().getSuperclass().getDeclaredField("id");
+            Field idField = object.getClass().getSuperclass().getDeclaredField("id");
+            idField.setAccessible(true);
+            return idField;
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
             throw new RuntimeException();
