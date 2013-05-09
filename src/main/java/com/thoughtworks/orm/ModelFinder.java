@@ -21,39 +21,48 @@ public class ModelFinder {
     public static <T> T findById(Class<T> modelClass, int id) {
         try {
             String findByIdQuery = getFindByIdQuery(modelClass);
-            ResultSet resultSet = getResultSet(id, findByIdQuery);
-            ArrayList<Object> objects = createObjectsFromResult(modelClass, resultSet);
-            Object model = objects.get(0);
-            setChildren(model, id);
-            return (T) model;
+            ArrayList<Model> models = getObject(modelClass, findByIdQuery, id);
+            return (T) models.get(0);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException();
         }
     }
 
-    private static ResultSet getResultSet(int id, String findByIdQuery) throws SQLException {
+    private static <T> ArrayList<Model> getObject(Class<T> modelClass, String query, Object... params) throws SQLException {
+        ResultSet resultSet = getResultSet(query, params);
+        ArrayList<Model> objects = createObjectsFromResult(modelClass, resultSet);
+        for (Model model : objects) {
+            setChildren(model, model.getId());
+        }
+        return objects;
+    }
+
+    private static ResultSet getResultSet(String findByIdQuery, Object... params) throws SQLException {
         PreparedStatement statement = ConnectionManager.getDBConnection().prepareStatement(findByIdQuery);
-        statement.setObject(1, id);
+        for (int i = 0; i < params.length; i++) {
+            statement.setObject(i + 1, params[i]);
+        }
         return statement.executeQuery();
     }
 
-    private static void setChildren(Object model, int id) {
+    private static void setChildren(Object model, int parentId) {
         Iterable<Field> associationFields = ModelHelper.getHasAssociationFields(model);
         for (Field field : associationFields) {
             if (field.isAnnotationPresent(HasOne.class)) {
-                processHasOne(model, field, id);
+                processHasOne(model, field, parentId);
             } else {
-                processHasMany(model, field, id);
+                processHasMany(model, field, parentId);
             }
         }
     }
 
-    private static void processHasOne(Object model, Field field, int parent_id) {
-        String foreignKey = field.getAnnotation(HasOne.class).foreignKey();
-        Class<?> childType = field.getType();
+    private static void processHasOne(Object model, Field field, int parentId) {
+        HasOne annotation = field.getAnnotation(HasOne.class);
+        String foreignKey = annotation.foreignKey();
+        Class<?> childType = annotation.klass();
         try {
-            ArrayList<Object> children = getChildren(parent_id, foreignKey, childType);
+            ArrayList<Model> children = getChildren(childType, foreignKey, parentId);
             if (!children.isEmpty()) {
                 field.set(model, children.get(0));
             }
@@ -62,12 +71,12 @@ public class ModelFinder {
         }
     }
 
-    private static void processHasMany(Object model, Field field, int parent_id) {
+    private static void processHasMany(Object model, Field field, int parentId) {
         HasMany annotation = field.getAnnotation(HasMany.class);
         String foreignKey = annotation.foreignKey();
         Class childType = annotation.klass();
         try {
-            ArrayList<Object> children = getChildren(parent_id, foreignKey, childType);
+            ArrayList<Model> children = getChildren(childType, foreignKey, parentId);
             if (!children.isEmpty()) {
                 field.set(model, children);
             }
@@ -76,18 +85,17 @@ public class ModelFinder {
         }
     }
 
-    private static ArrayList<Object> getChildren(int parent_id, String foreignKey, Class childType) throws SQLException, InstantiationException, IllegalAccessException {
+    private static ArrayList<Model> getChildren(Class childType, String foreignKey, int parentId) throws SQLException, InstantiationException, IllegalAccessException {
         String criteria = String.format("%s = ?", foreignKey);
         String whereQuery = getWhereQuery(getTableName(childType), criteria);
-        ResultSet resultSet = getResultSet(parent_id, whereQuery);
-        return createObjectsFromResult(childType, resultSet);
+        return getObject(childType, whereQuery, parentId);
     }
 
-    private static ArrayList<Object> createObjectsFromResult(Class modelClass, ResultSet resultSet) throws SQLException {
-        ArrayList<Object> resultLists = new ArrayList<>();
+    private static ArrayList<Model> createObjectsFromResult(Class modelClass, ResultSet resultSet) throws SQLException {
+        ArrayList<Model> resultLists = new ArrayList<>();
         while (resultSet.next()) {
             try {
-                Object child = modelClass.newInstance();
+                Model child = (Model) modelClass.newInstance();
                 Iterable<Field> columns = getAttributesForInsertWithId(child);
                 for (Field input : columns) {
                     String columnName = getColumnName(input);
