@@ -32,4 +32,22 @@ public class OneToOneAssociationTest extends DBTest {
         Owner result = ModelFinder.findById(Owner.class, owner.getId());
         assertThat(result.getHouse(), nullValue());
     }
+
+    @Test
+    public void should_eager_load_all_houses_when_get_all_owners() {
+        List<Owner> owners = Lists.newArrayList(
+                new Owner("Mao", new House(100)),
+                new Owner("Er", new House(150)),
+                new Owner("Chao", new House(200))
+        );
+        for (Owner owner : owners) {
+            owner.save();
+        }
+
+        ConnectionManager.connectNumber = 0;
+        List<Owner> result = ModelFinder.findAll(Owner.class);
+
+        assertThat(result, is(owners));
+        assertThat(ConnectionManager.connectNumber, is(2));
+    }
 }

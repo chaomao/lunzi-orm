@@ -28,4 +28,11 @@ public class House extends Model {
     public int hashCode() {
         return size;
     }
+
+    @Override
+    public String toString() {
+        return "House{" +
+                "size=" + size +
+                '}';
+    }
 }

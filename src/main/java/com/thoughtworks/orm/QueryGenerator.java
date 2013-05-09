@@ -1,8 +1,10 @@
 package com.thoughtworks.orm;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.thoughtworks.orm.ModelHelper.*;
@@ -16,7 +18,7 @@ public class QueryGenerator {
                 join(getAttributePlaceHolders(attributesForInsert), ", "));
     }
 
-    private static Iterable<String> getAttributePlaceHolders(Iterable attributes) {
+    public static Iterable<String> getAttributePlaceHolders(Iterable attributes) {
         return transform(attributes, new Function<Object, String>() {
             @Override
             public String apply(Object input) {
@@ -54,7 +56,9 @@ public class QueryGenerator {
         return String.format("SELECT * FROM %s", getTableName(klass));
     }
 
-    public static String getWhereQuery(String tableName, String criteria) {
-        return String.format("SELECT * FROM %s WHERE %s", tableName, criteria);
+    public static String getWhereQuery(Class childType, String foreignKey, Object... parentIds) {
+        ArrayList<Object> objects = Lists.newArrayList(parentIds);
+        String criteria = String.format("%s in (%s)", foreignKey, join(getAttributePlaceHolders(objects), ","));
+        return String.format("SELECT * FROM %s WHERE %s", getTableName(childType), criteria);
     }
 }

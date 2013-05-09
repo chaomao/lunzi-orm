@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.find;
 
 public class ModelHelper {
 
@@ -54,8 +55,34 @@ public class ModelHelper {
         return fields;
     }
 
+    private static ArrayList<Field> getAllAttributes(Class klass) {
+        ArrayList<Field> fields = Lists.newArrayList(klass.getDeclaredFields());
+        for (Field field : fields) {
+            field.setAccessible(true);
+        }
+        return fields;
+    }
+
     public static Iterable<Field> getHasAssociationFields(Object object) {
         return filter(getAllAttributes(object), new Predicate<Field>() {
+            @Override
+            public boolean apply(Field input) {
+                return hasAssociation(input);
+            }
+        });
+    }
+
+    public static Field getAssociationField(Object object, final Class fieldType) {
+        return find(getAllAttributes(object), new Predicate<Field>() {
+            @Override
+            public boolean apply(Field input) {
+                return hasAssociation(input) && input.getType().equals(fieldType);
+            }
+        });
+    }
+
+    public static Iterable<Field> getHasAssociationFields(Class klass) {
+        return filter(getAllAttributes(klass), new Predicate<Field>() {
             @Override
             public boolean apply(Field input) {
                 return hasAssociation(input);

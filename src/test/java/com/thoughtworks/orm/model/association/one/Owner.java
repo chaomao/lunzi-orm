@@ -20,4 +20,32 @@ public class Owner extends Model {
     public House getHouse() {
         return house;
     }
+
+    @Override
+    public String toString() {
+        return "Owner{" +
+                "name='" + name + '\'' +
+                ", house=" + house +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Owner)) return false;
+
+        Owner owner = (Owner) o;
+
+        if (house != null ? !house.equals(owner.house) : owner.house != null) return false;
+        if (name != null ? !name.equals(owner.name) : owner.name != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (house != null ? house.hashCode() : 0);
+        return result;
+    }
 }

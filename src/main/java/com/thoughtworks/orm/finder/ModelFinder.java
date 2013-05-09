@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.thoughtworks.orm.ModelHelper.getHasAssociationFields;
 import static com.thoughtworks.orm.QueryGenerator.getFindByIdQuery;
 
 public class ModelFinder {
@@ -29,9 +30,9 @@ public class ModelFinder {
         if (params == null) {
             params = new Object[]{};
         }
-        ArrayList<Model> objects = createObjectsFromResult(modelClass, getResultSet(query, params));
-        setChildren(objects);
-        return objects;
+        ArrayList<Model> models = createObjectsFromResult(modelClass, getResultSet(query, params));
+        setChildren(modelClass, models);
+        return models;
     }
 
     private static ResultSet getResultSet(String findByIdQuery, Object... params) {
@@ -48,13 +49,18 @@ public class ModelFinder {
         }
     }
 
-    private static void setChildren(ArrayList<Model> objects) {
-        for (Model object : objects) {
-            Iterable<Field> associationFields = ModelHelper.getHasAssociationFields(object);
-            for (Field field : associationFields) {
-                getAssociationSetter(field).process(object, field, object.getId());
+    private static void setChildren(Class modelClass, ArrayList<Model> models) {
+        if (!models.isEmpty()) {
+            for (Field field : getHasAssociationFields(modelClass)) {
+                getAssociationSetter(field).process(models, field);
             }
         }
+//        for (Model object : models) {
+//            Iterable<Field> associationFields = getHasAssociationFields(object);
+//            for (Field field : associationFields) {
+//                getAssociationSetter(field).process(object, field, object.getId());
+//            }
+//        }
     }
 
     private static AssociationSetter getAssociationSetter(Field field) {

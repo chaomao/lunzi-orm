@@ -7,8 +7,10 @@ import static java.sql.DriverManager.getConnection;
 
 public class ConnectionManager {
     private static Connection connection;
+    public static int connectNumber = 0;
 
     public static Connection getDBConnection() {
+        connectNumber++;
         try {
             if (connection == null || connection.isClosed()) {
                 connection = connect();
