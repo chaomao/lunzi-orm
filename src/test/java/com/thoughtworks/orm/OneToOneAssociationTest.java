@@ -1,9 +1,12 @@
 package com.thoughtworks.orm;
 
+import com.google.common.collect.Lists;
 import com.thoughtworks.orm.finder.ModelFinder;
 import com.thoughtworks.orm.model.association.one.House;
 import com.thoughtworks.orm.model.association.one.Owner;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;

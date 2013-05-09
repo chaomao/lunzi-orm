@@ -1,6 +1,9 @@
 package com.thoughtworks.orm.finder;
 
-import com.thoughtworks.orm.*;
+import com.thoughtworks.orm.ConnectionManager;
+import com.thoughtworks.orm.Model;
+import com.thoughtworks.orm.ModelHelper;
+import com.thoughtworks.orm.QueryGenerator;
 import com.thoughtworks.orm.annotation.HasOne;
 
 import java.lang.reflect.Field;
@@ -13,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.thoughtworks.orm.QueryGenerator.getFindByIdQuery;
-import static com.thoughtworks.orm.QueryGenerator.getWhereQuery;
 
 public class ModelFinder {
 
@@ -23,7 +25,7 @@ public class ModelFinder {
         return (T) models.get(0);
     }
 
-    private static <T> ArrayList<Model> getModels(Class<T> modelClass, String query, Object... params) {
+    static <T> ArrayList<Model> getModels(Class<T> modelClass, String query, Object... params) {
         if (params == null) {
             params = new Object[]{};
         }
@@ -59,12 +61,6 @@ public class ModelFinder {
         return field.isAnnotationPresent(HasOne.class) ?
                 new OneToOneSetter() :
                 new OneToManySetter();
-    }
-
-    static ArrayList<Model> getChildren(Class childType, String foreignKey, int parentId) throws SQLException, InstantiationException, IllegalAccessException {
-        String criteria = String.format("%s = ?", foreignKey);
-        String whereQuery = getWhereQuery(ModelHelper.getTableName(childType), criteria);
-        return getModels(childType, whereQuery, parentId);
     }
 
     private static ArrayList<Model> createObjectsFromResult(Class modelClass, ResultSet resultSet) {

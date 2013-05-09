@@ -7,9 +7,7 @@ import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import static com.thoughtworks.orm.finder.ModelFinder.getChildren;
-
-class OneToManySetter implements AssociationSetter {
+class OneToManySetter extends AssociationSetter {
 
     @Override
     public void process(Object model, Field field, int parentId) {
