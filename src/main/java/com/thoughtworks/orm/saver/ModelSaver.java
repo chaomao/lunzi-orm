@@ -60,14 +60,18 @@ public class ModelSaver {
     }
 
     private void saveWithParent(Field field, Model associatedModel) throws IllegalAccessException {
-        ModelWithParentSaver saver = new ModelWithParentSaver(associatedModel, getModel(), field);
-        saver.save();
+        if (associatedModel != null) {
+            ModelWithParentSaver saver = new ModelWithParentSaver(associatedModel, getModel(), field);
+            saver.save();
+        }
     }
 
     private void saveListWithParent(Field field) throws IllegalAccessException {
         ArrayList<? extends Model> list = (ArrayList) field.get(getModel());
-        for (Model associatedModel : list) {
-            saveWithParent(field, associatedModel);
+        if (list != null) {
+            for (Model associatedModel : list) {
+                saveWithParent(field, associatedModel);
+            }
         }
     }
 

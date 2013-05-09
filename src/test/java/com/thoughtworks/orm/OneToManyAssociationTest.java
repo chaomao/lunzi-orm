@@ -8,7 +8,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 public class OneToManyAssociationTest extends DBTest {
@@ -21,5 +21,14 @@ public class OneToManyAssociationTest extends DBTest {
 
         RichOwner result = ModelFinder.findById(RichOwner.class, owner.getId());
         assertThat(result.getHouses(), is(houses));
+    }
+
+    @Test
+    public void should_save_rich_owner_without_houses() {
+        RichOwner owner = new RichOwner("Mao Chao", null);
+        owner.save();
+
+        RichOwner result = ModelFinder.findById(RichOwner.class, owner.getId());
+        assertThat(result.getHouses(), nullValue());
     }
 }

@@ -53,7 +53,10 @@ public class ModelFinder {
         String foreignKey = field.getAnnotation(HasOne.class).foreignKey();
         Class<?> childType = field.getType();
         try {
-            field.set(model, getChildren(parent_id, foreignKey, childType).get(0));
+            ArrayList<Object> children = getChildren(parent_id, foreignKey, childType);
+            if (!children.isEmpty()) {
+                field.set(model, children.get(0));
+            }
         } catch (SQLException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -64,7 +67,10 @@ public class ModelFinder {
         String foreignKey = annotation.foreignKey();
         Class childType = annotation.klass();
         try {
-            field.set(model, getChildren(parent_id, foreignKey, childType));
+            ArrayList<Object> children = getChildren(parent_id, foreignKey, childType);
+            if (!children.isEmpty()) {
+                field.set(model, children);
+            }
         } catch (SQLException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
