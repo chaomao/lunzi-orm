@@ -55,12 +55,6 @@ public class ModelFinder {
                 getAssociationSetter(field).process(models, field);
             }
         }
-//        for (Model object : models) {
-//            Iterable<Field> associationFields = getHasAssociationFields(object);
-//            for (Field field : associationFields) {
-//                getAssociationSetter(field).process(object, field, object.getId());
-//            }
-//        }
     }
 
     private static AssociationSetter getAssociationSetter(Field field) {
@@ -74,11 +68,8 @@ public class ModelFinder {
         try {
             while (resultSet.next()) {
                 Model child = (Model) modelClass.newInstance();
-                Iterable<Field> columns = ModelHelper.getAttributesForInsertWithId(child);
-                for (Field input : columns) {
-                    String columnName = getColumnName(input);
-                    Class<?> columnType = input.getType();
-                    Object value = generateAttribute(resultSet, columnName, columnType);
+                for (Field input : ModelHelper.getAttributesForInsertWithId(child)) {
+                    Object value = generateAttribute(resultSet, input);
                     input.set(child, value);
                 }
                 resultLists.add(child);
@@ -89,7 +80,9 @@ public class ModelFinder {
         return resultLists;
     }
 
-    private static Object generateAttribute(ResultSet resultSet, String columnName, Class<?> columnType) throws SQLException {
+    private static Object generateAttribute(ResultSet resultSet, Field input) throws SQLException {
+        String columnName = input.getName();
+        Class<?> columnType = input.getType();
         if (columnType.isEnum()) {
             return getEnumValue(resultSet, columnName, columnType);
         } else if (columnType.equals(ArrayList.class)) {
@@ -114,10 +107,6 @@ public class ModelFinder {
     private static Object getEnumValue(ResultSet resultSet, String columnName, Class columnType) throws SQLException {
         String object = resultSet.getObject(columnName, String.class);
         return Enum.valueOf((Class<Enum>) columnType, object);
-    }
-
-    private static String getColumnName(Field input) {
-        return input.getName();
     }
 
     public static <T> List<T> findAll(Class<T> modelClass) {

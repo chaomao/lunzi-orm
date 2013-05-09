@@ -17,6 +17,7 @@ class OneToOneSetter extends AssociationSetter {
 
     @Override
     public void process(List<Model> parents, Field associationField) {
+        //todo move annotation to instance variable
         HasOne annotation = associationField.getAnnotation(HasOne.class);
         String foreignKey = annotation.foreignKey();
         Class<?> childType = annotation.klass();
