@@ -9,26 +9,26 @@ import java.util.Map;
 
 import static com.thoughtworks.orm.ModelHelper.getAssociationField;
 
-class OneToMany implements Mapper {
-    private Field associationField;
+class OneToManyMapper implements Mapper {
+    private Field associatedField;
 
-    public OneToMany(Field associationField) {
-        this.associationField = associationField;
+    public OneToManyMapper(Field associatedField) {
+        this.associatedField = associatedField;
     }
 
     @Override
     public String getForeignKey() {
-        return this.associationField.getAnnotation(HasMany.class).foreignKey();
+        return this.associatedField.getAnnotation(HasMany.class).foreignKey();
     }
 
     @Override
-    public Class<?> getChildType() {
-        return this.associationField.getAnnotation(HasMany.class).klass();
+    public Class<?> getAssociationClass() {
+        return this.associatedField.getAnnotation(HasMany.class).klass();
     }
 
     @Override
     public void mapChildToParent(Map.Entry<Integer, List<Model>> entry, Model model) throws IllegalAccessException {
-        Field targetField = getAssociationField(model, associationField.getType());
+        Field targetField = getAssociationField(model, associatedField.getType());
         targetField.set(model, entry.getValue());
     }
 }

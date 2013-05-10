@@ -9,10 +9,10 @@ import java.util.Map;
 
 import static com.thoughtworks.orm.ModelHelper.getAssociationField;
 
-class OneToOne implements Mapper {
+class OneToOneMapper implements Mapper {
     private Field associationField;
 
-    public OneToOne(Field associationField) {
+    public OneToOneMapper(Field associationField) {
         this.associationField = associationField;
     }
 
@@ -22,7 +22,7 @@ class OneToOne implements Mapper {
     }
 
     @Override
-    public Class<?> getChildType() {
+    public Class<?> getAssociationClass() {
         return this.associationField.getAnnotation(HasOne.class).klass();
     }
 

@@ -41,9 +41,10 @@ public class ModelFinder {
     static void setChildren(Class modelClass, List<Model> models) {
         if (!models.isEmpty()) {
             for (Field field : getHasAssociationFields(modelClass)) {
-                AssociationSetter associationSetter = field.isAnnotationPresent(HasOne.class) ?
-                        new OneToOneSetter(models, field) :
-                        new OneToManySetter(models, field);
+                Mapper mapper = field.isAnnotationPresent(HasOne.class) ?
+                        new OneToOneMapper(field) :
+                        new OneToManyMapper(field);
+                AssociationSetter associationSetter = new AssociationSetter(models, mapper);
                 associationSetter.process();
             }
         }

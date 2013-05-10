@@ -4,7 +4,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.thoughtworks.orm.Model;
 
-import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -19,35 +18,42 @@ import static com.thoughtworks.orm.finder.ModelFinder.setChildren;
 
 class AssociationSetter {
 
-    protected final List<Model> parents;
-    protected final Field associationField;
-    private String foreignKey;
-    private Class<?> childType;
+    private final List<Model> parents;
+    private Mapper mapper;
 
-    protected AssociationSetter(List<Model> parents, Field associationField) {
+    protected AssociationSetter(List<Model> parents, Mapper mapper) {
         this.parents = parents;
-        this.associationField = associationField;
+        this.mapper = mapper;
     }
 
-    protected Map<Integer, List<Model>> getChildrenMap() throws SQLException, InstantiationException, IllegalAccessException {
+    private Map<Integer, List<Model>> getChildrenMap() throws SQLException, InstantiationException, IllegalAccessException {
         Object[] parentIds = getParentId();
-        ResultSet resultSet = getResultSet(getWhereQuery(getChildType(), getForeignKey(), parentIds), parentIds);
+        ResultSet resultSet = getResultSet(getWhereQuery(mapper.getAssociationClass(), mapper.getForeignKey(), parentIds), parentIds);
+        HashMap<Integer, List<Model>> resultMap = getResultMapFromResult(resultSet);
+        updateChildrenAssociation(resultMap);
+        return resultMap;
+    }
+
+    private HashMap<Integer, List<Model>> getResultMapFromResult(ResultSet resultSet) {
         HashMap<Integer, List<Model>> resultMap = new HashMap<>();
         try {
             while (resultSet.next()) {
-                Model child = ModelFinder.createModelWithoutAssociation(getChildType(), resultSet);
-                Integer abc = (Integer) resultSet.getObject(getForeignKey());
-                pushChildIntoMap(resultMap, child, abc);
+                Model child = ModelFinder.createModelWithoutAssociation(mapper.getAssociationClass(), resultSet);
+                Integer parentId = (Integer) resultSet.getObject(mapper.getForeignKey());
+                pushChildIntoMap(resultMap, child, parentId);
             }
         } catch (InstantiationException | IllegalAccessException | SQLException e) {
             e.printStackTrace();
         }
+        return resultMap;
+    }
+
+    private void updateChildrenAssociation(HashMap<Integer, List<Model>> resultMap) {
         List<Model> children = new ArrayList<>();
         for (List<Model> models : resultMap.values()) {
             children.addAll(models);
         }
-        setChildren(getChildType(), children);
-        return resultMap;
+        setChildren(mapper.getAssociationClass(), children);
     }
 
     private Object[] getParentId() {
@@ -59,11 +65,11 @@ class AssociationSetter {
         }), Object.class);
     }
 
-    private void pushChildIntoMap(HashMap<Integer, List<Model>> resultLists, Model child, Integer abc) {
-        if (!resultLists.containsKey(abc)) {
-            resultLists.put(abc, new ArrayList<Model>());
+    private void pushChildIntoMap(HashMap<Integer, List<Model>> resultLists, Model child, Integer parentId) {
+        if (!resultLists.containsKey(parentId)) {
+            resultLists.put(parentId, new ArrayList<Model>());
         }
-        resultLists.get(abc).add(child);
+        resultLists.get(parentId).add(child);
     }
 
     protected Model findModel(List<Model> parents, final Integer parentId) {
@@ -75,37 +81,17 @@ class AssociationSetter {
         }).orNull();
     }
 
-    protected void mapChildToParent(Map.Entry<Integer, List<Model>> entry, Model model) throws IllegalAccessException {
-
-    }
-
     public void process() {
         try {
             Map<Integer, List<Model>> children = getChildrenMap();
             for (final Map.Entry<Integer, List<Model>> entry : children.entrySet()) {
                 Model model = findModel(parents, entry.getKey());
                 if (model != null) {
-                    mapChildToParent(entry, model);
+                    mapper.mapChildToParent(entry, model);
                 }
             }
         } catch (SQLException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
-    }
-
-    public String getForeignKey() {
-        return foreignKey;
-    }
-
-    public void setForeignKey(String foreignKey) {
-        this.foreignKey = foreignKey;
-    }
-
-    public Class<?> getChildType() {
-        return childType;
-    }
-
-    public void setChildType(Class<?> childType) {
-        this.childType = childType;
     }
 }

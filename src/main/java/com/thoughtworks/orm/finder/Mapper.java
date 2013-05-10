@@ -8,7 +8,7 @@ import java.util.Map;
 public interface Mapper {
     String getForeignKey();
 
-    Class<?> getChildType();
+    Class<?> getAssociationClass();
 
     void mapChildToParent(Map.Entry<Integer, List<Model>> entry, Model model) throws IllegalAccessException;
 }
