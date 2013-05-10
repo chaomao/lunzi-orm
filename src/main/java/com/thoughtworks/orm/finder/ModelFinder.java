@@ -1,8 +1,6 @@
 package com.thoughtworks.orm.finder;
 
-import com.thoughtworks.orm.ConnectionManager;
 import com.thoughtworks.orm.Model;
-import com.thoughtworks.orm.QueryGenerator;
 import com.thoughtworks.orm.annotation.HasOne;
 
 import java.lang.reflect.Field;
@@ -16,6 +14,7 @@ import java.util.List;
 import static com.thoughtworks.orm.ConnectionManager.getResultSet;
 import static com.thoughtworks.orm.ModelHelper.getAttributesForInsertWithId;
 import static com.thoughtworks.orm.ModelHelper.getHasAssociationFields;
+import static com.thoughtworks.orm.QueryGenerator.getFindAllQuery;
 import static com.thoughtworks.orm.QueryGenerator.getFindByIdQuery;
 
 public class ModelFinder {
@@ -24,6 +23,10 @@ public class ModelFinder {
         String findByIdQuery = getFindByIdQuery(modelClass);
         ArrayList<Model> models = getModels(modelClass, findByIdQuery, id);
         return (T) models.get(0);
+    }
+
+    public static <T> List<T> findAll(Class<T> modelClass) {
+        return (List<T>) getModels(modelClass, getFindAllQuery(modelClass));
     }
 
     static <T> ArrayList<Model> getModels(Class<T> modelClass, String query, Object... params) {
@@ -38,32 +41,34 @@ public class ModelFinder {
     static void setChildren(Class modelClass, List<Model> models) {
         if (!models.isEmpty()) {
             for (Field field : getHasAssociationFields(modelClass)) {
-                getAssociationSetter(field).process(models, field);
+                AssociationSetter associationSetter = field.isAnnotationPresent(HasOne.class) ?
+                        new OneToOneSetter(models, field) :
+                        new OneToManySetter(models, field);
+                associationSetter.process();
             }
         }
-    }
-
-    private static AssociationSetter getAssociationSetter(Field field) {
-        return field.isAnnotationPresent(HasOne.class) ?
-                new OneToOneSetter() :
-                new OneToManySetter();
     }
 
     static ArrayList<Model> createObjectsFromResult(Class modelClass, ResultSet resultSet) {
         ArrayList<Model> resultLists = new ArrayList<>();
         try {
             while (resultSet.next()) {
-                Model child = (Model) modelClass.newInstance();
-                for (Field field : getAttributesForInsertWithId(child)) {
-                    Object value = generateFieldValue(resultSet, field);
-                    field.set(child, value);
-                }
+                Model child = createModelWithoutAssociation(modelClass, resultSet);
                 resultLists.add(child);
             }
         } catch (InstantiationException | IllegalAccessException | SQLException e) {
             e.printStackTrace();
         }
         return resultLists;
+    }
+
+    static Model createModelWithoutAssociation(Class modelClass, ResultSet resultSet) throws InstantiationException, IllegalAccessException, SQLException {
+        Model child = (Model) modelClass.newInstance();
+        for (Field field : getAttributesForInsertWithId(child)) {
+            Object value = generateFieldValue(resultSet, field);
+            field.set(child, value);
+        }
+        return child;
     }
 
     static Object generateFieldValue(ResultSet resultSet, Field field) throws SQLException {
@@ -93,9 +98,5 @@ public class ModelFinder {
     private static Object getEnumValue(ResultSet resultSet, String columnName, Class columnType) throws SQLException {
         String object = resultSet.getObject(columnName, String.class);
         return Enum.valueOf((Class<Enum>) columnType, object);
-    }
-
-    public static <T> List<T> findAll(Class<T> modelClass) {
-        return (List<T>) getModels(modelClass, QueryGenerator.getFindAllQuery(modelClass));
     }
 }
