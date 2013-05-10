@@ -14,7 +14,7 @@ import java.util.Map;
 import static com.google.common.collect.Iterables.*;
 import static com.thoughtworks.orm.ConnectionManager.getResultSet;
 import static com.thoughtworks.orm.QueryGenerator.getWhereQuery;
-import static com.thoughtworks.orm.finder.ModelFinder.setChildren;
+import static com.thoughtworks.orm.finder.ModelFactory.setChildren;
 
 class AssociationSetter {
 
@@ -38,7 +38,7 @@ class AssociationSetter {
         HashMap<Integer, List<Model>> resultMap = new HashMap<>();
         try {
             while (resultSet.next()) {
-                Model child = ModelFinder.createModelWithoutAssociation(mapper.getAssociationClass(), resultSet);
+                Model child = ModelFactory.createModelWithoutAssociation(mapper.getAssociationClass(), resultSet);
                 Integer parentId = (Integer) resultSet.getObject(mapper.getForeignKey());
                 pushChildIntoMap(resultMap, child, parentId);
             }

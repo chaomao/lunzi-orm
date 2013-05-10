@@ -28,7 +28,6 @@ class OneToManyMapper implements Mapper {
 
     @Override
     public void mapChildToParent(Map.Entry<Integer, List<Model>> entry, Model model) throws IllegalAccessException {
-        Field targetField = getAssociationField(model, associatedField.getType());
-        targetField.set(model, entry.getValue());
+        getAssociationField(model, associatedField.getType()).set(model, entry.getValue());
     }
 }
