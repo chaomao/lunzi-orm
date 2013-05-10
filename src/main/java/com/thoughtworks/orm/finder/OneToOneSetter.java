@@ -1,17 +1,17 @@
 package com.thoughtworks.orm.finder;
 
-import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.thoughtworks.orm.Model;
-import com.thoughtworks.orm.ModelHelper;
 import com.thoughtworks.orm.annotation.HasOne;
 
 import java.lang.reflect.Field;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.collect.Iterables.toArray;
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Iterables.tryFind;
+import static com.thoughtworks.orm.ModelHelper.getAssociationField;
 
 class OneToOneSetter extends AssociationSetter {
 
@@ -23,27 +23,21 @@ class OneToOneSetter extends AssociationSetter {
         Class<?> childType = annotation.klass();
         try {
             Iterable<Object> parentsIds = getParentIds(parents);
-            ArrayList<Model> children = getChildrenWithEagerLoading(childType, foreignKey, toArray(parentsIds, Object.class));
-            setEachChildToParent(parents, children, associationField);
+            Map<Integer, List<Model>> children = getChildrenWithEagerLoading(childType, foreignKey, toArray(parentsIds, Object.class));
+            for (final Map.Entry<Integer, List<Model>> entry : children.entrySet()) {
+                Model model = tryFind(parents, new Predicate<Model>() {
+                    @Override
+                    public boolean apply(Model input) {
+                        return entry.getKey().equals(input.getId());
+                    }
+                }).orNull();
+                if (model != null) {
+                    Field targetField = getAssociationField(model, associationField.getType());
+                    targetField.set(model, entry.getValue().get(0));
+                }
+            }
         } catch (SQLException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
-    }
-
-    private void setEachChildToParent(List<Model> parents, ArrayList<Model> children, Field associationField) throws IllegalAccessException {
-        for (int i = 0; i < children.size(); i++) {
-            Model parent = parents.get(i);
-            Field targetField = ModelHelper.getAssociationField(parent, associationField.getType());
-            targetField.set(parent, children.get(i));
-        }
-    }
-
-    private Iterable<Object> getParentIds(List<Model> parents) {
-        return transform(parents, new Function<Model, Object>() {
-            @Override
-            public Object apply(Model input) {
-                return input.getId();
-            }
-        });
     }
 }

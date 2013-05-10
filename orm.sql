@@ -23,6 +23,12 @@ CREATE TABLE house (
   owner_id INT(11)
 );
 
+CREATE TABLE room (
+  id       INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  size     INT(11),
+  house_id INT(11)
+);
+
 CREATE TABLE person (
   id               INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   age              INT,

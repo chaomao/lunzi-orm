@@ -2,6 +2,7 @@ package com.thoughtworks.orm;
 
 import com.google.common.collect.Lists;
 import com.thoughtworks.orm.finder.ModelFinder;
+import com.thoughtworks.orm.model.association.many.Room;
 import com.thoughtworks.orm.model.association.one.House;
 import com.thoughtworks.orm.model.association.one.Owner;
 import org.junit.Test;
@@ -34,11 +35,11 @@ public class OneToOneAssociationTest extends DBTest {
     }
 
     @Test
-    public void should_eager_load_all_houses_when_get_all_owners() {
+    public void should_eager_load_all_houses_and_all_rooms_when_get_all_owners() {
         List<Owner> owners = Lists.newArrayList(
-                new Owner("Mao", new House(100)),
-                new Owner("Er", new House(150)),
-                new Owner("Chao", new House(200))
+                new Owner("Mao", new House(100, new Room(1))),
+                new Owner("Er", null),
+                new Owner("Chao", new House(200, new Room(2)))
         );
         for (Owner owner : owners) {
             owner.save();
@@ -48,6 +49,6 @@ public class OneToOneAssociationTest extends DBTest {
         List<Owner> result = ModelFinder.findAll(Owner.class);
 
         assertThat(result, is(owners));
-        assertThat(ConnectionManager.connectNumber, is(2));
+        assertThat(ConnectionManager.connectNumber, is(3));
     }
 }

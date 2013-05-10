@@ -2,19 +2,19 @@ package com.thoughtworks.orm.finder;
 
 import com.thoughtworks.orm.ConnectionManager;
 import com.thoughtworks.orm.Model;
-import com.thoughtworks.orm.ModelHelper;
 import com.thoughtworks.orm.QueryGenerator;
 import com.thoughtworks.orm.annotation.HasOne;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.thoughtworks.orm.ConnectionManager.getResultSet;
+import static com.thoughtworks.orm.ModelHelper.getAttributesForInsertWithId;
 import static com.thoughtworks.orm.ModelHelper.getHasAssociationFields;
 import static com.thoughtworks.orm.QueryGenerator.getFindByIdQuery;
 
@@ -35,21 +35,7 @@ public class ModelFinder {
         return models;
     }
 
-    private static ResultSet getResultSet(String findByIdQuery, Object... params) {
-        PreparedStatement statement;
-        try {
-            statement = ConnectionManager.getDBConnection().prepareStatement(findByIdQuery);
-            for (int i = 0; i < params.length; i++) {
-                statement.setObject(i + 1, params[i]);
-            }
-            return statement.executeQuery();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-    }
-
-    private static void setChildren(Class modelClass, ArrayList<Model> models) {
+    static void setChildren(Class modelClass, List<Model> models) {
         if (!models.isEmpty()) {
             for (Field field : getHasAssociationFields(modelClass)) {
                 getAssociationSetter(field).process(models, field);
@@ -63,14 +49,14 @@ public class ModelFinder {
                 new OneToManySetter();
     }
 
-    private static ArrayList<Model> createObjectsFromResult(Class modelClass, ResultSet resultSet) {
+    static ArrayList<Model> createObjectsFromResult(Class modelClass, ResultSet resultSet) {
         ArrayList<Model> resultLists = new ArrayList<>();
         try {
             while (resultSet.next()) {
                 Model child = (Model) modelClass.newInstance();
-                for (Field input : ModelHelper.getAttributesForInsertWithId(child)) {
-                    Object value = generateAttribute(resultSet, input);
-                    input.set(child, value);
+                for (Field field : getAttributesForInsertWithId(child)) {
+                    Object value = generateFieldValue(resultSet, field);
+                    field.set(child, value);
                 }
                 resultLists.add(child);
             }
@@ -80,9 +66,9 @@ public class ModelFinder {
         return resultLists;
     }
 
-    private static Object generateAttribute(ResultSet resultSet, Field input) throws SQLException {
-        String columnName = input.getName();
-        Class<?> columnType = input.getType();
+    static Object generateFieldValue(ResultSet resultSet, Field field) throws SQLException {
+        String columnName = field.getName();
+        Class<?> columnType = field.getType();
         if (columnType.isEnum()) {
             return getEnumValue(resultSet, columnName, columnType);
         } else if (columnType.equals(ArrayList.class)) {

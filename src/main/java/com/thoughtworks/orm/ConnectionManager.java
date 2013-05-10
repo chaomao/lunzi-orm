@@ -1,13 +1,15 @@
 package com.thoughtworks.orm;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static java.sql.DriverManager.getConnection;
 
 public class ConnectionManager {
-    private static Connection connection;
     public static int connectNumber = 0;
+    private static Connection connection;
 
     public static Connection getDBConnection() {
         connectNumber++;
@@ -24,5 +26,18 @@ public class ConnectionManager {
 
     private static Connection connect() throws SQLException {
         return getConnection("jdbc:mysql://localhost:3306/orm?user=root");
+    }
+
+    public static ResultSet getResultSet(String sqlQuery, Object... params) {
+        PreparedStatement statement = null;
+        try {
+            statement = getDBConnection().prepareStatement(sqlQuery);
+            for (int i = 0; i < params.length; i++) {
+                statement.setObject(i + 1, params[i]);
+            }
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException();
+        }
     }
 }

@@ -20,6 +20,7 @@ public abstract class DBTest {
         connection.createStatement().execute("TRUNCATE richowner;");
         connection.createStatement().execute("TRUNCATE house;");
         connection.createStatement().execute("TRUNCATE person;");
+        connection.createStatement().execute("TRUNCATE room;");
         connection.close();
     }
 }
