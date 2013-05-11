@@ -26,7 +26,7 @@ public class ModelHelperTest {
 
     @Test
     public void should_not_return_has_many_field() throws NoSuchFieldException {
-        Iterable<Field> fields = ModelHelper.getAttributesForInsert(new RichOwner());
+        Iterable<Field> fields = ModelHelper.getAttributesWithoutAssociation(new RichOwner());
         Field houseField = RichOwner.class.getDeclaredField("houses");
         ArrayList<Field> actual = Lists.newArrayList(fields);
 

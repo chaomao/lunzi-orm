@@ -22,7 +22,7 @@ public class ModelHelper {
     }
 
     public static Iterable<Field> getAttributesForInsertWithId(Object object) {
-        ArrayList<Field> fields = Lists.newArrayList(getAttributesForInsert(object));
+        ArrayList<Field> fields = Lists.newArrayList(getAttributesWithoutAssociation(object));
         fields.add(getIdField(object));
         return fields;
     }
@@ -38,7 +38,7 @@ public class ModelHelper {
         }
     }
 
-    public static Iterable<Field> getAttributesForInsert(Object object) {
+    public static Iterable<Field> getAttributesWithoutAssociation(Object object) {
         return filter(getAllAttributes(object), new Predicate<Field>() {
             @Override
             public boolean apply(Field input) {

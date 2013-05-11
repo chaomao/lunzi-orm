@@ -20,6 +20,7 @@ class ColumnValueGenerator {
         return resultSet.getObject(columnName, columnType);
     }
 
+    //todo change serialize way
     private static Object getArrayListValue(ResultSet resultSet, String columnName, Class<?> columnType) {
         try {
             String object = resultSet.getObject(columnName, String.class);

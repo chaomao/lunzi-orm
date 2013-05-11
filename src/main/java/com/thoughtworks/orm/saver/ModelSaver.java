@@ -42,7 +42,7 @@ public class ModelSaver {
     }
 
     protected Iterable<Field> getAttributesForInsert() {
-        return ModelHelper.getAttributesForInsert(getModel());
+        return ModelHelper.getAttributesWithoutAssociation(getModel());
     }
 
     protected void saveAssociations() {

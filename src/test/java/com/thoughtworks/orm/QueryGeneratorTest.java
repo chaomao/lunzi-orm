@@ -16,10 +16,9 @@ import static org.junit.Assert.assertThat;
 public class QueryGeneratorTest {
 
     @Test
-    //todo rename it
-    public void should_generate_insert_query() {
+    public void should_generate_insert_query_without_association() {
         final Author object = new Author();
-        String actual = QueryGenerator.insertQuery(object, ModelHelper.getAttributesForInsert(object));
+        String actual = QueryGenerator.insertQuery(object, ModelHelper.getAttributesWithoutAssociation(object));
 
         String expect = "INSERT INTO author (name) VALUES (?)";
 
@@ -29,7 +28,7 @@ public class QueryGeneratorTest {
     @Test
     public void should_generate_insert_query_without_has_one_association() {
         final Owner object = new Owner();
-        String actual = QueryGenerator.insertQuery(object, ModelHelper.getAttributesForInsert(object));
+        String actual = QueryGenerator.insertQuery(object, ModelHelper.getAttributesWithoutAssociation(object));
 
         String expect = "INSERT INTO owner (name) VALUES (?)";
 
@@ -39,7 +38,7 @@ public class QueryGeneratorTest {
     @Test
     public void should_generate_insert_query_with_has_many_association() throws NoSuchFieldException {
         final House house = new House();
-        ArrayList<Field> fields = Lists.newArrayList(ModelHelper.getAttributesForInsert(house));
+        ArrayList<Field> fields = Lists.newArrayList(ModelHelper.getAttributesWithoutAssociation(house));
         Field housesField = RichOwner.class.getDeclaredField("houses");
         housesField.setAccessible(true);
         fields.add(housesField);
