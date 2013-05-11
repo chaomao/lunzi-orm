@@ -22,9 +22,23 @@ class AssociationSetter {
     private final List<Model> parents;
     private Mapper mapper;
 
-    protected AssociationSetter(List<Model> parents, Mapper mapper) {
+    public AssociationSetter(List<Model> parents, Mapper mapper) {
         this.parents = parents;
         this.mapper = mapper;
+    }
+
+    public void process() {
+        try {
+            Map<Integer, List<Model>> children = getChildrenMap();
+            for (final Map.Entry<Integer, List<Model>> entry : children.entrySet()) {
+                Model model = findModel(parents, entry.getKey());
+                if (model != null) {
+                    mapper.mapChildToParent(entry, model);
+                }
+            }
+        } catch (SQLException | InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     private Map<Integer, List<Model>> getChildrenMap() throws SQLException, InstantiationException, IllegalAccessException {
@@ -80,19 +94,5 @@ class AssociationSetter {
                 return parentId.equals(input.getId());
             }
         }).orNull();
-    }
-
-    public void process() {
-        try {
-            Map<Integer, List<Model>> children = getChildrenMap();
-            for (final Map.Entry<Integer, List<Model>> entry : children.entrySet()) {
-                Model model = findModel(parents, entry.getKey());
-                if (model != null) {
-                    mapper.mapChildToParent(entry, model);
-                }
-            }
-        } catch (SQLException | InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
     }
 }
