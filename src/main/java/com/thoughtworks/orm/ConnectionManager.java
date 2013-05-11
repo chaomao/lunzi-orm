@@ -24,12 +24,16 @@ public class ConnectionManager {
         return connection;
     }
 
+    public static DataSet getDataSet(String sqlQuery, Object... params) {
+        return DataSet.createByResultSet(getResultSet(sqlQuery, params));
+    }
+
     private static Connection connect() throws SQLException {
         return getConnection("jdbc:mysql://localhost:3306/orm?user=root");
     }
 
-    public static ResultSet getResultSet(String sqlQuery, Object... params) {
-        PreparedStatement statement = null;
+    private static ResultSet getResultSet(String sqlQuery, Object... params) {
+        PreparedStatement statement;
         try {
             statement = getDBConnection().prepareStatement(sqlQuery);
             for (int i = 0; i < params.length; i++) {

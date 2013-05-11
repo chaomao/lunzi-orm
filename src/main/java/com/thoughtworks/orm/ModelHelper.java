@@ -27,6 +27,15 @@ public class ModelHelper {
         return fields;
     }
 
+    public static Iterable<Field> getAttributesWithoutAssociation(Object object) {
+        return filter(getAllAttributes(object), new Predicate<Field>() {
+            @Override
+            public boolean apply(Field input) {
+                return !hasAssociation(input);
+            }
+        });
+    }
+
     private static Field getIdField(Object object) {
         try {
             Field idField = object.getClass().getSuperclass().getDeclaredField("id");
@@ -36,15 +45,6 @@ public class ModelHelper {
             e.printStackTrace();
             throw new RuntimeException();
         }
-    }
-
-    public static Iterable<Field> getAttributesWithoutAssociation(Object object) {
-        return filter(getAllAttributes(object), new Predicate<Field>() {
-            @Override
-            public boolean apply(Field input) {
-                return !hasAssociation(input);
-            }
-        });
     }
 
     private static ArrayList<Field> getAllAttributes(Object object) {
@@ -64,19 +64,14 @@ public class ModelHelper {
     }
 
     public static Iterable<Field> getHasAssociationFields(Object object) {
-        return filter(getAllAttributes(object), new Predicate<Field>() {
-            @Override
-            public boolean apply(Field input) {
-                return hasAssociation(input);
-            }
-        });
+        return getHasAssociationFields(object.getClass());
     }
 
     public static Field getAssociationField(Object object, final Class fieldType) {
-        return find(getAllAttributes(object), new Predicate<Field>() {
+        return find(getHasAssociationFields(object), new Predicate<Field>() {
             @Override
             public boolean apply(Field input) {
-                return hasAssociation(input) && input.getType().equals(fieldType);
+                return input.getType().equals(fieldType);
             }
         });
     }

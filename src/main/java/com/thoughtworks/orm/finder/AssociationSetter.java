@@ -2,9 +2,10 @@ package com.thoughtworks.orm.finder;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.thoughtworks.orm.DataRow;
+import com.thoughtworks.orm.DataSet;
 import com.thoughtworks.orm.Model;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Iterables.*;
-import static com.thoughtworks.orm.ConnectionManager.getResultSet;
+import static com.thoughtworks.orm.ConnectionManager.getDataSet;
 import static com.thoughtworks.orm.QueryGenerator.getWhereQuery;
 import static com.thoughtworks.orm.finder.ModelFactory.createModelWithoutAssociation;
 import static com.thoughtworks.orm.finder.ModelFactory.setChildren;
@@ -43,22 +44,18 @@ class AssociationSetter {
 
     private Map<Integer, List<Model>> getChildrenMap() throws SQLException, InstantiationException, IllegalAccessException {
         Object[] parentIds = getParentId();
-        ResultSet resultSet = getResultSet(getWhereQuery(mapper.getAssociationClass(), mapper.getForeignKey(), parentIds), parentIds);
-        HashMap<Integer, List<Model>> resultMap = getResultMapFromResult(resultSet);
+        DataSet dataSet = getDataSet(getWhereQuery(mapper.getAssociationClass(), mapper.getForeignKey(), parentIds), parentIds);
+        HashMap<Integer, List<Model>> resultMap = getResultMapFromResult(dataSet);
         updateChildrenAssociation(resultMap);
         return resultMap;
     }
 
-    private HashMap<Integer, List<Model>> getResultMapFromResult(ResultSet resultSet) {
+    private HashMap<Integer, List<Model>> getResultMapFromResult(DataSet dataSet) {
         HashMap<Integer, List<Model>> resultMap = new HashMap<>();
-        try {
-            while (resultSet.next()) {
-                Model child = createModelWithoutAssociation(mapper.getAssociationClass(), resultSet);
-                Integer parentId = (Integer) resultSet.getObject(mapper.getForeignKey());
-                pushChildIntoMap(resultMap, child, parentId);
-            }
-        } catch (InstantiationException | IllegalAccessException | SQLException e) {
-            e.printStackTrace();
+        for (DataRow row : dataSet) {
+            Model child = createModelWithoutAssociation(mapper.getAssociationClass(), row);
+            Integer parentId = (Integer) row.getObject(mapper.getForeignKey());
+            pushChildIntoMap(resultMap, child, parentId);
         }
         return resultMap;
     }

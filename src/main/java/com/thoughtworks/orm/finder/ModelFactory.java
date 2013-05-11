@@ -1,18 +1,21 @@
 package com.thoughtworks.orm.finder;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.thoughtworks.orm.DataRow;
+import com.thoughtworks.orm.DataSet;
 import com.thoughtworks.orm.Model;
 import com.thoughtworks.orm.annotation.HasOne;
 
 import java.lang.reflect.Field;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.thoughtworks.orm.ConnectionManager.getResultSet;
+import static com.google.common.collect.Iterables.transform;
+import static com.thoughtworks.orm.ConnectionManager.getDataSet;
 import static com.thoughtworks.orm.ModelHelper.getAttributesForInsertWithId;
 import static com.thoughtworks.orm.ModelHelper.getHasAssociationFields;
-import static com.thoughtworks.orm.finder.ColumnValueGenerator.generateFieldValue;
 
 //TODO I should get all data from ResultSet, not pass ResultSet everywhere
 class ModelFactory {
@@ -21,7 +24,7 @@ class ModelFactory {
         if (params == null) {
             params = new Object[]{};
         }
-        ArrayList<Model> models = createObjectsFromResult(modelClass, getResultSet(query, params));
+        ArrayList<Model> models = createObjectsFromResult(modelClass, getDataSet(query, params));
         setChildren(modelClass, models);
         return models;
     }
@@ -38,24 +41,25 @@ class ModelFactory {
         }
     }
 
-    static Model createModelWithoutAssociation(Class modelClass, ResultSet resultSet) throws InstantiationException, IllegalAccessException, SQLException {
-        Model child = (Model) modelClass.newInstance();
-        for (Field field : getAttributesForInsertWithId(child)) {
-            field.set(child, generateFieldValue(resultSet, field));
-        }
-        return child;
-    }
-
-    private static ArrayList<Model> createObjectsFromResult(Class modelClass, ResultSet resultSet) {
+    static Model createModelWithoutAssociation(Class modelClass, DataRow dataRow) {
         try {
-            ArrayList<Model> resultLists = new ArrayList<>();
-            while (resultSet.next()) {
-                resultLists.add(createModelWithoutAssociation(modelClass, resultSet));
+            Model child = (Model) modelClass.newInstance();
+            for (Field field : getAttributesForInsertWithId(child)) {
+                field.set(child, dataRow.generateFieldValue(field));
             }
-            return resultLists;
+            return child;
         } catch (InstantiationException | IllegalAccessException | SQLException e) {
             e.printStackTrace();
             throw new RuntimeException();
         }
+    }
+
+    private static ArrayList<Model> createObjectsFromResult(final Class modelClass, DataSet dataSet) {
+        return Lists.newArrayList(transform(dataSet, new Function<DataRow, Model>() {
+            @Override
+            public Model apply(DataRow row) {
+                return createModelWithoutAssociation(modelClass, row);
+            }
+        }));
     }
 }

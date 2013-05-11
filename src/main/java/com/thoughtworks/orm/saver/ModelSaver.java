@@ -2,7 +2,6 @@ package com.thoughtworks.orm.saver;
 
 import com.thoughtworks.orm.ConnectionManager;
 import com.thoughtworks.orm.Model;
-import com.thoughtworks.orm.ModelHelper;
 import com.thoughtworks.orm.QueryGenerator;
 
 import java.lang.reflect.Field;
@@ -10,6 +9,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+import static com.thoughtworks.orm.ModelHelper.getAttributesWithoutAssociation;
+import static com.thoughtworks.orm.ModelHelper.getHasAssociationFields;
 
 public class ModelSaver {
     protected Model model;
@@ -21,7 +23,7 @@ public class ModelSaver {
     public void save() {
         PreparedStatement statement = null;
         try {
-            String query = QueryGenerator.insertQuery(getModel(), getAttributesForInsert());
+            String query = QueryGenerator.insertQuery(model, getAttributesForInsert());
             statement = prepareStatement(query);
             setAttributeValuesIntoStatement(statement);
             statement.executeUpdate();
@@ -37,37 +39,31 @@ public class ModelSaver {
         }
     }
 
-    private Model getModel() {
-        return model;
-    }
-
     protected Iterable<Field> getAttributesForInsert() {
-        return ModelHelper.getAttributesWithoutAssociation(getModel());
+        return getAttributesWithoutAssociation(model);
     }
 
     protected void saveAssociations() {
-        for (Field field : ModelHelper.getHasAssociationFields(getModel())) {
+        for (Field field : getHasAssociationFields(model)) {
             try {
                 if (field.getType().equals(ArrayList.class)) {
                     saveListWithParent(field);
                 } else {
-                    saveWithParent(field, (Model) field.get(getModel()));
+                    saveWithParent(field, (Model) field.get(model));
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            } catch (IllegalAccessException ignored) {
             }
         }
     }
 
     private void saveWithParent(Field field, Model associatedModel) throws IllegalAccessException {
         if (associatedModel != null) {
-            ModelWithParentSaver saver = new ModelWithParentSaver(associatedModel, getModel(), field);
-            saver.save();
+            new ModelWithParentSaver(associatedModel, model, field).save();
         }
     }
 
     private void saveListWithParent(Field field) throws IllegalAccessException {
-        ArrayList<? extends Model> list = (ArrayList) field.get(getModel());
+        ArrayList<? extends Model> list = (ArrayList) field.get(model);
         if (list != null) {
             for (Model associatedModel : list) {
                 saveWithParent(field, associatedModel);
@@ -88,7 +84,10 @@ public class ModelSaver {
     }
 
     protected Object createAttributeValue(Field field) throws IllegalAccessException {
-        Object value = field.get(getModel());
+        Object value = field.get(model);
+        if (value == null) {
+            return null;
+        }
         Class<?> type = field.getType();
         if (type.isEnum()) {
             return value.toString();
@@ -109,6 +108,6 @@ public class ModelSaver {
     protected void updateSelfId(PreparedStatement statement) throws SQLException {
         ResultSet generatedKeys = statement.getGeneratedKeys();
         generatedKeys.next();
-        getModel().setId(generatedKeys.getInt(1));
+        model.setId(generatedKeys.getInt(1));
     }
 }

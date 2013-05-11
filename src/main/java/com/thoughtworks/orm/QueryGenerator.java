@@ -11,6 +11,8 @@ import static com.thoughtworks.orm.ModelHelper.*;
 
 public class QueryGenerator {
     private static final String INSERT_QUERY = "INSERT INTO %s (%s) VALUES (%s)";
+    private static final String FIND_QUERY = "SELECT * FROM %s";
+    private static final String FIND_BY_WHERE_QUERY = "SELECT * FROM %s WHERE %s";
 
     public static String insertQuery(Object object, Iterable<Field> attributesForInsert) {
         return String.format(INSERT_QUERY, getTableName(object),
@@ -49,16 +51,16 @@ public class QueryGenerator {
     }
 
     public static String getFindByIdQuery(Class klass) {
-        return String.format("SELECT * FROM %s WHERE id=?", getTableName(klass));
+        return String.format(FIND_BY_WHERE_QUERY, getTableName(klass), "id=?");
     }
 
     public static String getFindAllQuery(Class klass) {
-        return String.format("SELECT * FROM %s", getTableName(klass));
+        return String.format(FIND_QUERY, getTableName(klass));
     }
 
     public static String getWhereQuery(Class childType, String foreignKey, Object... parentIds) {
         ArrayList<Object> objects = Lists.newArrayList(parentIds);
         String criteria = String.format("%s in (%s)", foreignKey, join(getAttributePlaceHolders(objects), ","));
-        return String.format("SELECT * FROM %s WHERE %s", getTableName(childType), criteria);
+        return String.format(FIND_BY_WHERE_QUERY, getTableName(childType), criteria);
     }
 }
