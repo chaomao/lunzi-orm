@@ -18,16 +18,20 @@ class OneToOneMapper implements Mapper {
 
     @Override
     public String getForeignKey() {
-        return this.associationField.getAnnotation(HasOne.class).foreignKey();
+        return getAnnotation().foreignKey();
     }
 
     @Override
     public Class<?> getAssociationClass() {
-        return this.associationField.getAnnotation(HasOne.class).klass();
+        return getAnnotation().klass();
     }
 
     @Override
     public void mapChildToParent(Map.Entry<Integer, List<Model>> entry, Model model) throws IllegalAccessException {
         getAssociationField(model, associationField.getType()).set(model, entry.getValue().get(0));
+    }
+
+    private HasOne getAnnotation() {
+        return this.associationField.getAnnotation(HasOne.class);
     }
 }
