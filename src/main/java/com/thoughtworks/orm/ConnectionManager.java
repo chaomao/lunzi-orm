@@ -1,9 +1,12 @@
 package com.thoughtworks.orm;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import static java.sql.DriverManager.getConnection;
 
@@ -20,7 +23,6 @@ public class ConnectionManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return connection;
     }
 
@@ -29,7 +31,16 @@ public class ConnectionManager {
     }
 
     private static Connection connect() throws SQLException {
-        return getConnection("jdbc:mysql://localhost:3306/orm?user=root");
+        try {
+            Properties prop = new Properties();
+            String file = ConnectionManager.class.getClassLoader().getResource("database.properties").getFile();
+            FileReader reader = new FileReader(file);
+            prop.load(reader);
+            return getConnection((String) prop.get("connectionURL"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
     }
 
     private static ResultSet getResultSet(String sqlQuery, Object... params) {
